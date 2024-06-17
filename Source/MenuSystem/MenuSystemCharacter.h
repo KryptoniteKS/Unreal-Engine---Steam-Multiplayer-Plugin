@@ -81,10 +81,19 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void CreateGameSession();
 
+	UFUNCTION(BlueprintCallable)
+	void JoinGameSession();
+
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful); // our callback function
+	void OnFindSessionsComplete(bool bWasSuccessful); // our callback function
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result); // callback
 
 private:
 
-	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate; // this will be the delegate we add to the session interface's delegate list
+	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate; // this will be the delegate we add to the session interface's delegate list for completion of creation a session
+	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate; // this will be the delegate we add to the session interface's delegate list for completion of finding a session
+	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate; // this will be the delegate we add to the session interface's delegate list for completion of joining a session
+
+	TSharedPtr<FOnlineSessionSearch> SessionSearch; // Stores our SessionSearch settings and results
 };
 
