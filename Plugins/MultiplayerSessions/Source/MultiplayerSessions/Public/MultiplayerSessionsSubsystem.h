@@ -38,6 +38,7 @@ protected:
 
 private:
 	IOnlineSessionPtr SessionInterface;
+	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
 
 	/* To add to the online session interface delegate list. We will bind our MultiplayerSessionsSubsystem internal callbacks to these.
 	*  The FDelegateHandle declarations are to store the handles to the delegates after we add delegates to the delegate list. This will allow us to remove
