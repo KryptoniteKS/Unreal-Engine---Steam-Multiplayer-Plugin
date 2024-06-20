@@ -48,8 +48,11 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
 	{
-		// If we fail to create a session, remove the delegate from the delegate list using our delegate handle - this prevents our callback being called
+		// If we fail to create a session, remove the delegate from the delegate list using our delegate handle - our callback won't be called anyway
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
+
+		// Broadcast our own custom delegate. False since we failed to create a session. We can broadcast true in our OnCreateSessionComplete callback function on our subsystem.
+		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
 }
 
@@ -63,20 +66,6 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 
 void UMultiplayerSessionsSubsystem::DestroySession()
 {
-
-
-
-	/*
-	* 
-	* virtual void NativeDestruct() override;
-	* 
-	void UMenu::NativeDestruct()
-	{
-		MenuTearDown();
- 
-		Super::NativeDestruct();
-	}
-	*/
 }
 
 void UMultiplayerSessionsSubsystem::StartSession()
@@ -85,6 +74,14 @@ void UMultiplayerSessionsSubsystem::StartSession()
 
 void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (SessionInterface)
+	{
+		// Remove our delegate from the delegate list. Our callback (this function) has already been triggered, so no need for this overhead anymore.
+		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
+	}
+
+	// Broadcast our custom delegate to our menu class callback function
+	MultiplayerOnCreateSessionComplete.Broadcast(bWasSuccessful);
 }
 
 void UMultiplayerSessionsSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
