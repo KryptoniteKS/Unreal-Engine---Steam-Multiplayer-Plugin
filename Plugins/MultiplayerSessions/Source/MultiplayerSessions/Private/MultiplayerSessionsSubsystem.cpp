@@ -45,6 +45,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	LastSessionSettings->bUsesPresence = true; // allows us to use presence in order to find sessions going on in our region
 	LastSessionSettings->bUseLobbiesIfAvailable = true; // required for some reason - need more research
 	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the match type key/value pair
+	LastSessionSettings->BuildUniqueId = 1; // Used to keep different builds from seeing each other during searches
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
