@@ -12,3 +12,26 @@ void USessionMenu::AddItemToList(UObject* SessionItem)
 		List->AddItem(Item);
 	}
 }
+
+void USessionMenu::MenuSetup(UMenu* InMenu)
+{
+	Menu = InMenu;
+
+	FSessionInfo TestSession;
+	TestSession.MapName = FString(TEXT("Herobrine's Lair"));
+	TestSession.LobbyName = FString(TEXT("Herobrine's 1v1 Mega Lobby"));
+	TestSession.NumPlayers = FString(TEXT("4/12"));
+	TestSession.HostName = FString(TEXT("Herobrine"));
+	TestSession.Ping = 9999;
+
+	AddToViewport();
+
+	USessionEntryDataWrapper* Wrapper = NewObject<USessionEntryDataWrapper>();
+	if (Wrapper != nullptr && List != nullptr)
+	{
+		Wrapper->SessionInfo = TestSession;
+		List->AddItem(Wrapper);
+		AddToViewport();
+	}
+
+}
