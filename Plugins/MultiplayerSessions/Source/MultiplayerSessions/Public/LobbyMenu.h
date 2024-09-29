@@ -26,6 +26,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Session Management")
 	TArray<USessionEntry*> Sessions;
 
+	UFUNCTION()
+	void OnSessionEntrySelected(USessionEntry* Session);
+
 
 private:
 	UPROPERTY(meta = (BindWidget))

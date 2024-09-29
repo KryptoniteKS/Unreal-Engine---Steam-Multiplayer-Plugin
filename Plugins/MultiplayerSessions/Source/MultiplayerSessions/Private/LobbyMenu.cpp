@@ -26,6 +26,7 @@ void ULobbyMenu::AddSession(USessionEntry* Session)
 {
 	// Must perform a cast for this method to work properly even though USessionEntry is a UUserWidget
 	ScrollBox_Sessions->AddChild(Cast<UWidget>(Session));
+	Sessions.Add(Session);
 
 	if (GEngine)
 	{
@@ -34,6 +35,20 @@ void ULobbyMenu::AddSession(USessionEntry* Session)
 			15.f,
 			FColor::Red,
 			FString(TEXT("Successfully added child to scroll box."))
+		);
+	}
+}
+
+// Callback function for when a session entry button is clicked
+void ULobbyMenu::OnSessionEntrySelected(USessionEntry* Session)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("A session entry has been selected!"))
 		);
 	}
 }
@@ -75,5 +90,8 @@ void ULobbyMenu::JoinButtonClicked()
 	}
 
 	USessionEntry* NewSession = CreateWidget<USessionEntry>(this, SessionEntryClass);
+	NewSession->SessionEntrySetup();
+	NewSession->OnSessionSelectedDelegate.AddDynamic(this, &ThisClass::OnSessionEntrySelected);
 	AddSession(NewSession);
+	
 }
