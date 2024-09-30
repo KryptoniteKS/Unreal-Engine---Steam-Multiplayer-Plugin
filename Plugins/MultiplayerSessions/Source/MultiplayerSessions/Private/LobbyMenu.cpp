@@ -43,22 +43,8 @@ void ULobbyMenu::AddSession(USessionEntry* Session)
 // Callback function for when a session entry button is clicked
 void ULobbyMenu::OnSessionEntrySelected(USessionEntry* Session)
 {
-	if (GEngine && Session)
+	if (Session)
 	{
-		auto MapName = Session->GetMapNameTextBox();
-		auto LobbyName = Session->GetLobbyTextBox();
-
-		if (MapName && LobbyName)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Red,
-				FString::Printf(TEXT("A session entry has been selected!\nMap Name: %s\nLobby Name: %s"),
-								*MapName->GetText().ToString(), *LobbyName->GetText().ToString())
-			);
-		}
-
 		if (SelectedSession)
 		{
 			SelectedSession->GetSessionEntryButton()->SetStyle(NormalButtonStyle);
@@ -66,6 +52,18 @@ void ULobbyMenu::OnSessionEntrySelected(USessionEntry* Session)
 		
 		Session->GetSessionEntryButton()->SetStyle(SelectedButtonStyle);
 		SelectedSession = Session;
+	}
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString(TEXT("Invalid session selected."))
+			);
+		}
 	}
 }
 
