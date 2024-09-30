@@ -38,6 +38,26 @@ void USessionEntry::OnSessionSelected()
 	OnSessionSelectedDelegate.Broadcast(this);
 }
 
+UTextBlock* USessionEntry::GetMapNameTextBox()
+{
+	return Text_MapName;
+}
+
+UTextBlock* USessionEntry::GetLobbyTextBox()
+{
+	return Text_LobbyName;
+}
+
+UTextBlock* USessionEntry::GetNumPlayersTextBox()
+{
+	return Text_NumPlayers;
+}
+
+UTextBlock* USessionEntry::GetPingTextBox()
+{
+	return Text_Ping;
+}
+
 void USessionEntry::NativeConstruct()
 {
 	Super::NativeConstruct();

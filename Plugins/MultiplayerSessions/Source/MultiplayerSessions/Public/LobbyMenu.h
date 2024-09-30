@@ -40,5 +40,9 @@ private:
 
 	UFUNCTION()
 	void JoinButtonClicked();
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FButtonStyle SelectedButtonStyle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FButtonStyle NormalButtonStyle;
 };

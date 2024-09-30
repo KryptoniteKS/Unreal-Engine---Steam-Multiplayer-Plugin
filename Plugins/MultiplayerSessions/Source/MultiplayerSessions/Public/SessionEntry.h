@@ -23,6 +23,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnSessionSelected();
 
+	UFUNCTION(BlueprintCallable)
+	class UTextBlock* GetMapNameTextBox();
+	UFUNCTION(BlueprintCallable)
+	class UTextBlock* GetLobbyTextBox();
+	UFUNCTION(BlueprintCallable)
+	class UTextBlock* GetNumPlayersTextBox();
+	UFUNCTION(BlueprintCallable)
+	class UTextBlock* GetPingTextBox();
+
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UTextBlock* Text_LobbyName;

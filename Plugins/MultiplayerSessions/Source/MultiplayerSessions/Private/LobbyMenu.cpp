@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "SessionEntry.h"
 #include "Components/ScrollBox.h"
+#include "Components/TextBlock.h"
 
 bool ULobbyMenu::Initialize()
 {
@@ -42,14 +43,29 @@ void ULobbyMenu::AddSession(USessionEntry* Session)
 // Callback function for when a session entry button is clicked
 void ULobbyMenu::OnSessionEntrySelected(USessionEntry* Session)
 {
-	if (GEngine)
+	if (GEngine && Session)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Red,
-			FString(TEXT("A session entry has been selected!"))
-		);
+		auto MapName = Session->GetMapNameTextBox();
+		auto LobbyName = Session->GetLobbyTextBox();
+
+		if (MapName && LobbyName)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString::Printf(TEXT("A session entry has been selected!\nMap Name: %s\nLobby Name: %s"),
+								*MapName->GetText().ToString(), *LobbyName->GetText().ToString())
+			);
+		}
+
+		if (SelectedSession)
+		{
+			SelectedSession->GetSessionEntryButton()->SetStyle(NormalButtonStyle);
+		}
+		
+		Session->GetSessionEntryButton()->SetStyle(SelectedButtonStyle);
+		SelectedSession = Session;
 	}
 }
 
@@ -91,6 +107,7 @@ void ULobbyMenu::JoinButtonClicked()
 
 	USessionEntry* NewSession = CreateWidget<USessionEntry>(this, SessionEntryClass);
 	NewSession->SessionEntrySetup();
+	NewSession->GetSessionEntryButton()->SetStyle(NormalButtonStyle);
 	NewSession->OnSessionSelectedDelegate.AddDynamic(this, &ThisClass::OnSessionEntrySelected);
 	AddSession(NewSession);
 	
