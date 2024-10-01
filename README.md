@@ -4,6 +4,7 @@ Simply click Host and you can Host a level of your choosing on a listen server.
 **Check out the Lobby-UI branch for the latest updates on this project where the UI is getting revamped to show a list of lobbies and options for hosting. This new UI will be much more scalable for any project.**
 
 If you'd like to utilize this plugin, simply download this repo as a zip. Then all you need to do is copy the Plugins folder over to another Unreal Engine project. Compatible with UE 5.0+ but only specifically tested on UE 5.3 and 5.4.
+
 <---------------------------------------------------------------------------------------------------------------------------------->
 
 Blank Project Tutorial
