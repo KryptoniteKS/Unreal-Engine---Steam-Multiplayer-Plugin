@@ -8,9 +8,8 @@
 
 #include "Menu.generated.h"
 
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNewJoinButtonClicked);
+
 UCLASS()
 class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 {
@@ -19,6 +18,11 @@ class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable)
 	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString LobbyPath = FString(TEXT("/Game/ThirdPerson/Maps/Lobby")));
+
+	UFUNCTION(BlueprintCallable)
+	class UButton* GetJoinButton();
+
+	FOnNewJoinButtonClicked OnNewJoinButtonClickedDelegate;
 
 protected:
 	virtual bool Initialize() override;
@@ -34,7 +38,6 @@ protected:
 	UFUNCTION()
 	void OnStartSession(bool bWasSuccessful);
 
-
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* HostButton;
@@ -42,11 +45,17 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
 
+	UPROPERTY(meta = (BindWidget))
+	class UButton* JoinButton_New;
+
 	UFUNCTION()
 	void HostButtonClicked();
 
 	UFUNCTION()
 	void JoinButtonClicked();
+
+	UFUNCTION()
+	void NewJoinButtonClicked();
 
 	void MenuTearDown();
 
@@ -59,4 +68,6 @@ private:
 
 	/* Lobby variables */
 	class ULobbyMenu* LobbyMenu;
+
+	
 };
