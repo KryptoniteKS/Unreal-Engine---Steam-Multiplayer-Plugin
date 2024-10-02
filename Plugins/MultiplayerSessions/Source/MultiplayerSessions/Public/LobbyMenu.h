@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "LobbyMenu.generated.h"
 
 /**
@@ -29,10 +30,14 @@ public:
 	UFUNCTION()
 	void OnSessionEntrySelected(USessionEntry* Session);
 
+protected:
+	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
 
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* SearchButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UScrollBox* ScrollBox_Sessions;
 	UPROPERTY(EditAnywhere)
@@ -40,9 +45,16 @@ private:
 
 	UFUNCTION()
 	void JoinButtonClicked();
+	UFUNCTION()
+	void SearchButtonClicked();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FButtonStyle SelectedButtonStyle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FButtonStyle NormalButtonStyle;
+
+	// Our subsystem designed to handle all online session functionality
+	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
+
+
 };

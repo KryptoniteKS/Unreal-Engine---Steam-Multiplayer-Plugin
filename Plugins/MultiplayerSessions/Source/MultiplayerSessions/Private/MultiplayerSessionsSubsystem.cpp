@@ -81,6 +81,14 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController(); // need this to get the FUniqueNetID
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
 	{
+
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("Find sessions failed to be invoked."))
+		);
+
 		// If we fail to start finding sessions, we will clear the delegate and broadcast that it failed.
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
 		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false); // We can pass an empty array here since it failed
@@ -108,7 +116,7 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
 	}
 
-	// If we succeed at calling JoinSession, we can expect our callback to be triggered
+	// If we succeed at calling JoinSession, we can expect our callback OnJoinSessionComplete to be triggered
 }
 
 void UMultiplayerSessionsSubsystem::DestroySession()

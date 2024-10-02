@@ -34,11 +34,5 @@ bool UMenuSwitcher::Initialize()
 
 void UMenuSwitcher::JoinButtonClicked()
 {
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		15.f,
-		FColor::Cyan,
-		FString(TEXT("Join Button Clicked"))
-	);
 	WidgetSwitcher->SetActiveWidget(Cast<UWidget>(LobbyMenu));
 }
