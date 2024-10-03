@@ -2,17 +2,29 @@
 
 
 #include "SessionEntry.h"
+#include "OnlineSessionSettings.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
 void USessionEntry::SessionEntrySetup()
 {
-	if (Text_LobbyName && Text_MapName && Text_NumPlayers && Text_Ping) 
+	if (SessionSearchResult.IsValid() && Text_LobbyName && Text_MapName && Text_NumPlayers && Text_Ping)
 	{
-		Text_LobbyName->SetText(FText::FromString("Test Lobby"));
-		Text_MapName->SetText(FText::FromString("Test Map Name"));
-		Text_NumPlayers->SetText(FText::FromString("12/64"));
-		Text_Ping->SetText(FText::FromString("43"));
+		Text_Ping->SetText(FText::AsNumber(SessionSearchResult.PingInMs));
+		Text_LobbyName->SetText(FText::FromString(SessionSearchResult.Session.OwningUserName));
+		int32 maxPlayers = SessionSearchResult.Session.SessionSettings.NumPublicConnections;
+		int32 numPlayers = maxPlayers - SessionSearchResult.Session.NumOpenPublicConnections;
+		FText playersText = FText::Format(FText::FromString(TEXT("{0}/{1}")), FText::AsNumber(numPlayers), FText::AsNumber(maxPlayers));
+		Text_NumPlayers->SetText(playersText);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("Setting up entry listing, but SessionSearchResult was not valid."))
+		);
 	}
 
 	// Bind button click callback

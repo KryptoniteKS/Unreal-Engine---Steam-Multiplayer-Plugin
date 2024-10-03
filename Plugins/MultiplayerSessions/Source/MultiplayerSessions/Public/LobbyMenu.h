@@ -16,7 +16,6 @@ class MULTIPLAYERSESSIONS_API ULobbyMenu : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void LobbyMenuSetup();
 	virtual bool Initialize();
 
 	UFUNCTION(BlueprintCallable, Category = "Session Management")

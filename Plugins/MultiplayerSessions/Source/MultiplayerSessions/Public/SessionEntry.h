@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "OnlineSessionSettings.h"
 #include "SessionEntry.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSessionSelected, class USessionEntry*, Session);
@@ -23,6 +24,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnSessionSelected();
 
+	/* Getters and Setters for Widget Controls */
 	UFUNCTION(BlueprintCallable)
 	class UTextBlock* GetMapNameTextBox();
 	UFUNCTION(BlueprintCallable)
@@ -31,6 +33,10 @@ public:
 	class UTextBlock* GetNumPlayersTextBox();
 	UFUNCTION(BlueprintCallable)
 	class UTextBlock* GetPingTextBox();
+
+	/* SessionSearchResult Getter and Setter */
+	void SetSessionSearchResult(const FOnlineSessionSearchResult& SearchResult) { SessionSearchResult = SearchResult; }
+	const FOnlineSessionSearchResult& GetSessionSearchResult() const { return SessionSearchResult; }
 
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
@@ -43,4 +49,6 @@ private:
 	class UTextBlock* Text_Ping;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UButton* Button_SessionEntry;
+
+	FOnlineSessionSearchResult SessionSearchResult;
 };

@@ -49,6 +49,7 @@ bool ULobbyMenu::Initialize()
 	return true;
 }
 
+
 void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
 {
 	if (MultiplayerSessionsSubsystem == nullptr)
@@ -60,7 +61,7 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 		-1,
 		15.f,
 		FColor::Red,
-		FString(TEXT("Test finding sessions..."))
+		FString(TEXT("Finding sessions..."))
 	);
 
 	for (auto Result : SessionResults)
@@ -69,24 +70,21 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue); // Gets the MatchType of the sessions and outputs it to SettingsValue
 		if (SettingsValue == "FreeForAll")
 		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Green,
+				FString(TEXT("Successfully found a session. Attempting to add it to the list..."))
+			);
+
 			// If we have found a session that matches our defined MatchType, let's add it to the list.
 			USessionEntry* NewSession = CreateWidget<USessionEntry>(this, SessionEntryClass);
+			NewSession->SetSessionSearchResult(Result);
 			NewSession->SessionEntrySetup();
 			NewSession->GetSessionEntryButton()->SetStyle(NormalButtonStyle);
-			NewSession->GetPingTextBox()->SetText(FText::AsNumber(Result.PingInMs));
-			NewSession->GetLobbyTextBox()->SetText(FText::FromString(Result.Session.OwningUserName));
-			int32 maxPlayers = Result.Session.SessionSettings.NumPublicConnections;
-			int32 numPlayers = maxPlayers - Result.Session.NumOpenPublicConnections;
-			FText playersText = FText::Format(FText::FromString(TEXT("{0}/{1}")), FText::AsNumber(numPlayers), FText::AsNumber(maxPlayers));
-			NewSession->GetNumPlayersTextBox()->SetText(playersText);
 			
 			NewSession->OnSessionSelectedDelegate.AddDynamic(this, &ThisClass::OnSessionEntrySelected);
 			AddSession(NewSession);
-
-
-
-			MultiplayerSessionsSubsystem->JoinSession(Result);
-			//return;
 		}
 	}
 
@@ -138,40 +136,28 @@ void ULobbyMenu::OnSessionEntrySelected(USessionEntry* Session)
 	}
 }
 
-
-
-void ULobbyMenu::LobbyMenuSetup()
-{
-	AddToViewport();
-	SetVisibility(ESlateVisibility::Visible);
-
-	//UWorld* World = GetWorld();
-	//if (World)
-	//{
-	//	APlayerController* PlayerController = World->GetFirstPlayerController();
-	//	if (PlayerController)
-	//	{
-	//		FInputModeUIOnly InputModeData;
-	//		InputModeData.SetWidgetToFocus(TakeWidget());
-	//		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	//		PlayerController->SetInputMode(InputModeData);
-	//		PlayerController->SetShowMouseCursor(true);
-	//	}
-	//}
-
-
-}
-
 void ULobbyMenu::JoinButtonClicked()
 {
-
-	/* Logic for each session we find after searching */
-	USessionEntry* NewSession = CreateWidget<USessionEntry>(this, SessionEntryClass);
-	NewSession->SessionEntrySetup();
-	NewSession->GetSessionEntryButton()->SetStyle(NormalButtonStyle);
-	NewSession->OnSessionSelectedDelegate.AddDynamic(this, &ThisClass::OnSessionEntrySelected);
-	AddSession(NewSession);
-	
+	auto Session = SelectedSession->GetSessionSearchResult();
+	if (Session.IsValid() && MultiplayerSessionsSubsystem != nullptr)
+	{
+		MultiplayerSessionsSubsystem->JoinSession(Session);
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Magenta,
+			FString::Format(TEXT("Joining {0}'s lobby..."), { Session.Session.OwningUserName })
+		);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("Either the session was invalid or the multiplayer subsystem was invalid."))
+		);
+	}
 }
 
 void ULobbyMenu::SearchButtonClicked()
