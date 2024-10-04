@@ -15,24 +15,25 @@ bool UMenuSwitcher::Initialize()
 
 	if (Menu)
 	{
+		// Bind our callback function to the delegate for the Menu's Join button
 		Menu->OnJoinButtonClickedDelegate.AddDynamic(this, &ThisClass::JoinButtonClicked);
 	}
-	else
+
+	if (LobbyMenu)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Red,
-			FString(TEXT("Menu was not valid!"))
-		);
+		// Bind our callback function to the delegate for the Lobby's Back button
+		LobbyMenu->OnBackButtonClickedDelegate.AddDynamic(this, &ThisClass::LobbyBackButtonClicked);
 	}
 
 	return true;
-
-	
 }
 
 void UMenuSwitcher::JoinButtonClicked()
 {
 	WidgetSwitcher->SetActiveWidget(Cast<UWidget>(LobbyMenu));
+}
+
+void UMenuSwitcher::LobbyBackButtonClicked()
+{
+	WidgetSwitcher->SetActiveWidget(Cast<UWidget>(Menu));
 }

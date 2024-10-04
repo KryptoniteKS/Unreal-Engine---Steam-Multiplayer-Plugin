@@ -16,15 +16,19 @@ class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	/* Initialization Logic */
 	UFUNCTION(BlueprintCallable)
 	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString LobbyPath = FString(TEXT("/Game/ThirdPerson/Maps/Lobby")));
 
+	/* Public Getters/Setters */
 	UFUNCTION(BlueprintCallable)
 	class UButton* GetJoinButton();
 
+	/* Delegates */
 	FOnJoinButtonClicked OnJoinButtonClickedDelegate;
 
 protected:
+	/* Overrides */
 	virtual bool Initialize() override;
 	virtual void NativeDestruct() override;
 
@@ -39,29 +43,24 @@ protected:
 	void OnStartSession(bool bWasSuccessful);
 
 private:
+	/* Widget Controls */
 	UPROPERTY(meta = (BindWidget))
 	class UButton* HostButton;
-
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
 
+	/* Button Callbacks */
 	UFUNCTION()
 	void HostButtonClicked();
-
 	UFUNCTION()
 	void JoinButtonClicked();
 
+	/* Destroy Logic */
 	void MenuTearDown();
 
-	// Our subsystem designed to handle all online session functionality
+	/* Networking Variables */
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
-
 	int32 NumPublicConnections{4};
 	FString MatchType{ TEXT("FreeForAll") };
 	FString PathToLobby{ TEXT("") };
-
-	/* Lobby variables */
-	class ULobbyMenu* LobbyMenu;
-
-	
 };

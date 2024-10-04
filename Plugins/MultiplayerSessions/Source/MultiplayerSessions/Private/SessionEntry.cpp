@@ -29,25 +29,17 @@ void USessionEntry::SessionEntrySetup()
 
 	// Bind button click callback
 	Button_SessionEntry->OnPressed.AddDynamic(this, &ThisClass::OnSessionSelected);
+}
 
+void USessionEntry::OnSessionSelected()
+{
+	// Broadcast a reference of itself to the LobbyMenu
+	OnSessionSelectedDelegate.Broadcast(this);
 }
 
 UButton* USessionEntry::GetSessionEntryButton()
 {
 	return Button_SessionEntry;
-}
-
-void USessionEntry::OnSessionSelected()
-{
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		15.f,
-		FColor::Blue,
-		FString(TEXT("Broadcasting..."))
-	);
-
-	// Broadcast a reference to itself to the LobbyMenu
-	OnSessionSelectedDelegate.Broadcast(this);
 }
 
 UTextBlock* USessionEntry::GetMapNameTextBox()
@@ -70,7 +62,3 @@ UTextBlock* USessionEntry::GetPingTextBox()
 	return Text_Ping;
 }
 
-void USessionEntry::NativeConstruct()
-{
-	Super::NativeConstruct();
-}

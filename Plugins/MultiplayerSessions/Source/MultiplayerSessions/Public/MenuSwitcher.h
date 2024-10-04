@@ -20,6 +20,7 @@ protected:
 	virtual bool Initialize() override;
 
 private:
+	/* Widget Controls */
 	UPROPERTY(meta = (BindWidget))
 	class UMenu* Menu;
 	UPROPERTY(meta = (BindWidget))
@@ -27,7 +28,11 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* WidgetSwitcher;
 
+
+	/* Callback functions for button delegates */
 	UFUNCTION()
 	void JoinButtonClicked();
+	UFUNCTION()
+	void LobbyBackButtonClicked();
 	
 };

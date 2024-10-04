@@ -27,6 +27,10 @@ bool ULobbyMenu::Initialize()
 	{
 		SearchButton->OnClicked.AddDynamic(this, &ThisClass::SearchButtonClicked);
 	}
+	if (BackButton)
+	{
+		BackButton->OnClicked.AddDynamic(this, &ThisClass::BackButtonClicked);
+	}
 
 	UGameInstance* GameInstance = GetGameInstance();
 	if (GameInstance)
@@ -97,16 +101,11 @@ void ULobbyMenu::AddSession(USessionEntry* Session)
 	// Must perform a cast for this method to work properly even though USessionEntry is a UUserWidget
 	ScrollBox_Sessions->AddChild(Cast<UWidget>(Session));
 	Sessions.Add(Session);
+}
 
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Red,
-			FString(TEXT("Successfully added child to scroll box."))
-		);
-	}
+void ULobbyMenu::ClearSessions()
+{
+	// TODO
 }
 
 // Callback function for when a session entry button is clicked
@@ -173,4 +172,9 @@ void ULobbyMenu::SearchButtonClicked()
 	{
 		MultiplayerSessionsSubsystem->FindSessions(10000);
 	}
+}
+
+void ULobbyMenu::BackButtonClicked()
+{
+	OnBackButtonClickedDelegate.Broadcast();
 }

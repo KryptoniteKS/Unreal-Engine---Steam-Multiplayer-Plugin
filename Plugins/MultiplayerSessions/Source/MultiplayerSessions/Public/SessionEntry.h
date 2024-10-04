@@ -15,12 +15,17 @@ class MULTIPLAYERSESSIONS_API USessionEntry : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct();
-
+	/* Initialization Logic */
 	UFUNCTION(BlueprintCallable)
 	void SessionEntrySetup();
+
+	/* Public Getters/Setters */
 	class UButton* GetSessionEntryButton();
+
+	/* Delegates */
 	FOnSessionSelected OnSessionSelectedDelegate;
+
+	/* Button Callbacks */
 	UFUNCTION(BlueprintCallable)
 	void OnSessionSelected();
 
@@ -39,6 +44,7 @@ public:
 	const FOnlineSessionSearchResult& GetSessionSearchResult() const { return SessionSearchResult; }
 
 private:
+	/* Widget Controls */
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UTextBlock* Text_LobbyName;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
@@ -50,5 +56,6 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UButton* Button_SessionEntry;
 
+	/* Networking Variables */
 	FOnlineSessionSearchResult SessionSearchResult;
 };
