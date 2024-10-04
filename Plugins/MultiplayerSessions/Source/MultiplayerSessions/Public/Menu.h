@@ -8,7 +8,7 @@
 
 #include "Menu.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNewJoinButtonClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinButtonClicked);
 
 UCLASS()
 class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
@@ -22,7 +22,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	class UButton* GetJoinButton();
 
-	FOnNewJoinButtonClicked OnNewJoinButtonClickedDelegate;
+	FOnJoinButtonClicked OnJoinButtonClickedDelegate;
 
 protected:
 	virtual bool Initialize() override;
@@ -45,17 +45,11 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
 
-	UPROPERTY(meta = (BindWidget))
-	class UButton* JoinButton_New;
-
 	UFUNCTION()
 	void HostButtonClicked();
 
 	UFUNCTION()
 	void JoinButtonClicked();
-
-	UFUNCTION()
-	void NewJoinButtonClicked();
 
 	void MenuTearDown();
 

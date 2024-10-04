@@ -138,6 +138,11 @@ void ULobbyMenu::OnSessionEntrySelected(USessionEntry* Session)
 
 void ULobbyMenu::JoinButtonClicked()
 {
+	if (!SelectedSession)
+	{
+		return;
+	}
+
 	auto Session = SelectedSession->GetSessionSearchResult();
 	if (Session.IsValid() && MultiplayerSessionsSubsystem != nullptr)
 	{

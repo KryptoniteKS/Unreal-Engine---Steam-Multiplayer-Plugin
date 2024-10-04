@@ -66,10 +66,6 @@ bool UMenu::Initialize()
 	{
 		JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
 	}
-	if (JoinButton_New)
-	{
-		JoinButton_New->OnClicked.AddDynamic(this, &ThisClass::NewJoinButtonClicked);
-	}
 
 	return true;
 }
@@ -177,7 +173,7 @@ void UMenu::OnStartSession(bool bWasSuccessful)
 
 UButton* UMenu::GetJoinButton()
 {
-	return JoinButton_New;
+	return JoinButton;
 }
 
 void UMenu::HostButtonClicked()
@@ -192,23 +188,13 @@ void UMenu::HostButtonClicked()
 
 void UMenu::JoinButtonClicked()
 {
-	JoinButton->SetIsEnabled(false);
-
-	if (MultiplayerSessionsSubsystem)
-	{
-		MultiplayerSessionsSubsystem->FindSessions(10000);
-	}
-}
-
-void UMenu::NewJoinButtonClicked()
-{
 	GEngine->AddOnScreenDebugMessage(
 		-1,
 		15.f,
 		FColor::Red,
 		FString(TEXT("Broadcasting click event..."))
 	);
-	OnNewJoinButtonClickedDelegate.Broadcast();
+	OnJoinButtonClickedDelegate.Broadcast();
 }
 
 void UMenu::MenuTearDown()

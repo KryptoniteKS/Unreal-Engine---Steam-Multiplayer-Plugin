@@ -15,7 +15,7 @@ bool UMenuSwitcher::Initialize()
 
 	if (Menu)
 	{
-		Menu->OnNewJoinButtonClickedDelegate.AddDynamic(this, &ThisClass::JoinButtonClicked);
+		Menu->OnJoinButtonClickedDelegate.AddDynamic(this, &ThisClass::JoinButtonClicked);
 	}
 	else
 	{
