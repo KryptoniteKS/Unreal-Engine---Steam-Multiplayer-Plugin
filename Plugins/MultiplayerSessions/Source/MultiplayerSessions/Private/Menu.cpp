@@ -178,12 +178,14 @@ UButton* UMenu::GetJoinButton()
 
 void UMenu::HostButtonClicked()
 {
-	HostButton->SetIsEnabled(false);
+	//HostButton->SetIsEnabled(false);
 
-	if (MultiplayerSessionsSubsystem)
+	/*if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
-	}
+	}*/
+
+	OnHostButtonClickedDelegate.Broadcast();
 }
 
 void UMenu::JoinButtonClicked()

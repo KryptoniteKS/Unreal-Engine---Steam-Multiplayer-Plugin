@@ -26,6 +26,8 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class ULobbyMenu* LobbyMenu;
 	UPROPERTY(meta = (BindWidget))
+	class UHostMenu* HostMenu;
+	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* WidgetSwitcher;
 
 
@@ -33,6 +35,10 @@ private:
 	UFUNCTION()
 	void JoinButtonClicked();
 	UFUNCTION()
-	void LobbyBackButtonClicked();
-	
+	void HostButtonClicked();
+	UFUNCTION()
+	void LobbyMenuBackButtonClicked();
+	UFUNCTION()
+	void HostMenuBackButtonClicked();
+
 };

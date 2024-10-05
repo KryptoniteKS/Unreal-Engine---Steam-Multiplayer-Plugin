@@ -5,6 +5,7 @@
 #include "Menu.h"
 #include "Components/WidgetSwitcher.h"
 #include "LobbyMenu.h"
+#include "HostMenu.h"
 
 bool UMenuSwitcher::Initialize()
 {
@@ -15,14 +16,21 @@ bool UMenuSwitcher::Initialize()
 
 	if (Menu)
 	{
-		// Bind our callback function to the delegate for the Menu's Join button
+		// Bind our MenuSwitcher callback functions to the delegates on the Menu buttons
 		Menu->OnJoinButtonClickedDelegate.AddDynamic(this, &ThisClass::JoinButtonClicked);
+		Menu->OnHostButtonClickedDelegate.AddDynamic(this, &ThisClass::HostButtonClicked);
 	}
 
 	if (LobbyMenu)
 	{
-		// Bind our callback function to the delegate for the Lobby's Back button
-		LobbyMenu->OnBackButtonClickedDelegate.AddDynamic(this, &ThisClass::LobbyBackButtonClicked);
+		// Bind our callback function to the delegate for the Lobby Menu's Back button
+		LobbyMenu->OnBackButtonClickedDelegate.AddDynamic(this, &ThisClass::LobbyMenuBackButtonClicked);
+	}
+
+	if (HostMenu)
+	{
+		// Bind our callback function to the delegate for the HostMenu's Back button
+		HostMenu->OnBackButtonClickedDelegate.AddDynamic(this, &ThisClass::HostMenuBackButtonClicked);
 	}
 
 	return true;
@@ -33,7 +41,17 @@ void UMenuSwitcher::JoinButtonClicked()
 	WidgetSwitcher->SetActiveWidget(Cast<UWidget>(LobbyMenu));
 }
 
-void UMenuSwitcher::LobbyBackButtonClicked()
+void UMenuSwitcher::HostButtonClicked()
+{
+	WidgetSwitcher->SetActiveWidget(Cast<UWidget>(HostMenu));
+}
+
+void UMenuSwitcher::LobbyMenuBackButtonClicked()
+{
+	WidgetSwitcher->SetActiveWidget(Cast<UWidget>(Menu));
+}
+
+void UMenuSwitcher::HostMenuBackButtonClicked()
 {
 	WidgetSwitcher->SetActiveWidget(Cast<UWidget>(Menu));
 }

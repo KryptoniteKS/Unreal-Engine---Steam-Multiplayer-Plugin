@@ -7,7 +7,7 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "LobbyMenu.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBackButtonClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyMenuBackButtonClicked);
 
 UCLASS()
 class MULTIPLAYERSESSIONS_API ULobbyMenu : public UUserWidget
@@ -34,7 +34,7 @@ public:
 	void OnSessionEntrySelected(USessionEntry* Session);
 
 	/* Delegates */
-	FOnBackButtonClicked OnBackButtonClickedDelegate;
+	FOnLobbyMenuBackButtonClicked OnBackButtonClickedDelegate;
 
 protected:
 	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);

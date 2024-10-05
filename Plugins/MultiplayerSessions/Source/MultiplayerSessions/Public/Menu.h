@@ -9,6 +9,7 @@
 #include "Menu.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinButtonClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHostButtonClicked);
 
 UCLASS()
 class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
@@ -26,6 +27,7 @@ public:
 
 	/* Delegates */
 	FOnJoinButtonClicked OnJoinButtonClickedDelegate;
+	FOnHostButtonClicked OnHostButtonClickedDelegate;
 
 protected:
 	/* Overrides */
