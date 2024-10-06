@@ -7,6 +7,7 @@
 #include "HostMenu.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHostMenuBackButtonClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHostMenuHostButtonClicked, FString, MapName, FString, LobbyName, FString, GameMode, int32, MaxNumPlayers);
 
 UCLASS()
 class MULTIPLAYERSESSIONS_API UHostMenu : public UUserWidget
@@ -14,20 +15,55 @@ class MULTIPLAYERSESSIONS_API UHostMenu : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	/* Initialization Logic */
-	virtual bool Initialize();
-
 	/* Custom Delegates for our Buttons */
 	FOnHostMenuBackButtonClicked OnBackButtonClickedDelegate;
+	FOnHostMenuHostButtonClicked OnHostButtonClickedDelegate;
+
+protected:
+	/* Initialization Logic */
+	virtual bool Initialize();
+	void FillMapsDropdown();
 
 private:
 	/* Widget Controls */
 	UPROPERTY(meta = (BindWidget))
 	class UButton* BackButton;
 	UPROPERTY(meta = (BindWidget))
+	class UButton* HostButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UEditableTextBox* Text_LobbyName;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UEditableTextBox* Text_NumPlayers;
+	UPROPERTY(meta = (BindWidget))
 	class UComboBoxString* Combo_Maps;
 
 	/* Button Callbacks */
 	UFUNCTION()
 	void BackButtonClicked();
+	UFUNCTION()
+	void HostButtonClicked();
+
+	/* Lobby Values */
+	FString MapName;
+	FString LobbyName;
+	FString GameMode;
+	int32 MaxNumPlayers;
+	TArray<FString> ServerMaps;
+
+	/* Default Values */
+	UPROPERTY(EditAnywhere, Category = "Server Defaults")
+	FString DefaultLobbyName = TEXT("My Default Lobby");
+	UPROPERTY(EditAnywhere, Category = "Server Defaults")
+	FString DefaultGameMode = TEXT("Free For All");
+	UPROPERTY(EditAnywhere, Category = "Server Defaults")
+	int32 DefaultMaxNumPlayers = 4;
+	UPROPERTY(EditAnywhere, Category = "Server Defaults")
+	FString ServerMapsDirectory = TEXT("Maps/Server"); // Directory beginning from Game/Content/ directory
+
+	/* Networking Variables */
+	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
+
+	/* Helper Functions */
+	FString FormatMapName(const FString& OriginalName);
+
 };
