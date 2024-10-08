@@ -7,7 +7,6 @@
 #include "HostMenu.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHostMenuBackButtonClicked);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHostMenuHostButtonClicked, FString, MapName, FString, LobbyName, FString, GameMode, int32, MaxNumPlayers);
 
 UCLASS()
 class MULTIPLAYERSESSIONS_API UHostMenu : public UUserWidget
@@ -17,12 +16,15 @@ class MULTIPLAYERSESSIONS_API UHostMenu : public UUserWidget
 public:
 	/* Custom Delegates for our Buttons */
 	FOnHostMenuBackButtonClicked OnBackButtonClickedDelegate;
-	FOnHostMenuHostButtonClicked OnHostButtonClickedDelegate;
 
 protected:
 	/* Initialization Logic */
 	virtual bool Initialize();
 	void FillMapsDropdown();
+
+	/* Custom Callbacks for the Multiplayer Subsystem */
+	UFUNCTION()
+	void OnCreateSession(bool bWasSuccessful);
 
 private:
 	/* Widget Controls */
@@ -36,6 +38,8 @@ private:
 	class UEditableTextBox* Text_NumPlayers;
 	UPROPERTY(meta = (BindWidget))
 	class UComboBoxString* Combo_Maps;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UComboBoxString* Combo_GameMode;
 
 	/* Button Callbacks */
 	UFUNCTION()
@@ -54,8 +58,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Server Defaults")
 	FString DefaultLobbyName = TEXT("My Default Lobby");
 	UPROPERTY(EditAnywhere, Category = "Server Defaults")
-	FString DefaultGameMode = TEXT("Free For All");
-	UPROPERTY(EditAnywhere, Category = "Server Defaults")
 	int32 DefaultMaxNumPlayers = 4;
 	UPROPERTY(EditAnywhere, Category = "Server Defaults")
 	FString ServerMapsDirectory = TEXT("Maps/Server"); // Directory beginning from Game/Content/ directory
@@ -64,6 +66,7 @@ private:
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
 	/* Helper Functions */
-	FString FormatMapName(const FString& OriginalName);
+	FString FormatMapName(const FString& OriginalName, bool bReturnLiteralName);
+	void EnableControls(bool bShouldEnable);
 
 };

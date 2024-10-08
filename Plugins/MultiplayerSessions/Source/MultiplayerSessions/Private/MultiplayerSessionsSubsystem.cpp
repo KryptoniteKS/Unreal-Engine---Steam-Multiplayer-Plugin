@@ -20,7 +20,7 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	}
 }
 
-void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FString MatchType)
+void UMultiplayerSessionsSubsystem::CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers)
 {
 	if (!SessionInterface.IsValid())
 	{
@@ -31,8 +31,10 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	if (ExistingSession != nullptr)
 	{
 		bCreateSessionOnDestroy = true;
-		LastNumPublicConnections = NumPublicConnections;
-		LastMatchType = MatchType;
+		LastMaxNumPlayers = MaxNumPlayers;
+		LastGameMode = GameMode;
+		LastMapName = MapName;
+		LastLobbyName = LobbyName;
 
 		// Destroy the session if one already exists
 		DestroySession();
@@ -42,13 +44,15 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
 	LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
-	LastSessionSettings->NumPublicConnections = NumPublicConnections; // max num players allowed in our game
+	LastSessionSettings->NumPublicConnections = MaxNumPlayers; // max num players allowed in our game
 	LastSessionSettings->bAllowJoinInProgress = true; // allow players to join while a session is already running
 	LastSessionSettings->bAllowJoinViaPresence = true; // presence means searching for sessions going on in your region of the world
 	LastSessionSettings->bShouldAdvertise = true; // allows steam to advertise the session so others can find and join
 	LastSessionSettings->bUsesPresence = true; // allows us to use presence in order to find sessions going on in our region
 	LastSessionSettings->bUseLobbiesIfAvailable = true; // required for some reason - need more research
-	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the match type key/value pair
+	LastSessionSettings->Set(FName("MapName"), MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Map Name key/value pair
+	LastSessionSettings->Set(FName("LobbyName"), LobbyName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Map Name key/value pair
+	LastSessionSettings->Set(FName("GameMode"), GameMode, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Game Mode key/value pair
 	LastSessionSettings->BuildUniqueId = 1; // Used to keep different builds from seeing each other during searches
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
@@ -196,7 +200,7 @@ void UMultiplayerSessionsSubsystem::OnDestroySessionComplete(FName SessionName, 
 	{
 		// If we have successfully destroyed a session and want to create a new one, let's do it
 		bCreateSessionOnDestroy = false; // reset the boolean to prevent bad logic in the future
-		CreateSession(LastNumPublicConnections, LastMatchType);
+		CreateSession(LastMapName, LastLobbyName, LastGameMode, LastMaxNumPlayers);
 	}
 
 	// Regardless of outcome, let's still broadcast the result

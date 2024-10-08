@@ -63,9 +63,9 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 
 	for (auto Result : SessionResults)
 	{
-		FString SettingsValue;
-		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue); // Gets the MatchType of the sessions and outputs it to SettingsValue
-		if (SettingsValue == "FreeForAll")
+		FString GameMode;
+		Result.Session.SessionSettings.Get(FName("GameMode"), GameMode); // Gets the GameMode of the sessions and outputs it to SettingsValue
+		if (GameMode == "Free For All")
 		{
 			GEngine->AddOnScreenDebugMessage(
 				-1,
