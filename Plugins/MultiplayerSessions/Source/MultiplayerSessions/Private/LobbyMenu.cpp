@@ -10,6 +10,7 @@
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSubsystem.h"
+#include "MenuHelper.h"
 
 bool ULobbyMenu::Initialize()
 {
@@ -32,6 +33,9 @@ bool ULobbyMenu::Initialize()
 		BackButton->OnClicked.AddDynamic(this, &ThisClass::BackButtonClicked);
 	}
 
+	FillMapComboBox();
+	FillGameModeComboBox();
+
 	UGameInstance* GameInstance = GetGameInstance();
 	if (GameInstance)
 	{
@@ -46,6 +50,22 @@ bool ULobbyMenu::Initialize()
 	return true;
 }
 
+
+void ULobbyMenu::FillMapComboBox()
+{
+	if (Combo_Maps)
+	{
+		MenuHelper::PopulateMapComboBox(Combo_Maps, true);
+	}
+}
+
+void ULobbyMenu::FillGameModeComboBox()
+{
+	if (Combo_GameModes)
+	{
+		MenuHelper::PopulateGameModeComboBox(Combo_GameModes, true);
+	}
+}
 
 void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
 {

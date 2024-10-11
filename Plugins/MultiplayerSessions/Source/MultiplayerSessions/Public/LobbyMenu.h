@@ -37,6 +37,11 @@ public:
 	FOnLobbyMenuBackButtonClicked OnBackButtonClickedDelegate;
 
 protected:
+	/* Initialization Logic */
+	void FillMapComboBox();
+	void FillGameModeComboBox();
+
+	/* Custom Callbacks */
 	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
 
 private:
@@ -49,6 +54,14 @@ private:
 	class UButton* BackButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UScrollBox* ScrollBox_Sessions;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UComboBoxString* Combo_Maps;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UComboBoxString* Combo_GameModes;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UEditableTextBox* TextSearch_Lobby;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UCheckBox* Check_ShowFullLobbies;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<USessionEntry> SessionEntryClass;
 

@@ -20,7 +20,9 @@ public:
 protected:
 	/* Initialization Logic */
 	virtual bool Initialize();
+	// TODO: Update dropdown to  have widget entries where maps can have thumbnails associated with them.
 	void FillMapsDropdown();
+	void FillGameModesDropdown();
 
 	/* Custom Callbacks for the Multiplayer Subsystem */
 	UFUNCTION()
@@ -65,8 +67,6 @@ private:
 	/* Networking Variables */
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
-	/* Helper Functions */
-	FString FormatMapName(const FString& OriginalName, bool bReturnLiteralName);
 	void EnableControls(bool bShouldEnable);
 
 };

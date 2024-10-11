@@ -7,6 +7,7 @@
 #include "Components/EditableTextBox.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "MultiplayerSessionsSubsystem.h"
+#include "MenuHelper.h"
 
 bool UHostMenu::Initialize()
 {
@@ -43,6 +44,7 @@ bool UHostMenu::Initialize()
 
 	// Fill our Maps dropdown with all maps in the Content/Maps folder and their corresponding thumbnail
 	FillMapsDropdown();
+	FillGameModesDropdown();
 
 	return true;
 }
@@ -50,35 +52,23 @@ bool UHostMenu::Initialize()
 /* Fills the Combo_Maps with all .umap assets that exist in the {ServerMapsDirectory} directory. */
 void UHostMenu::FillMapsDropdown()
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	TArray<FAssetData> AssetDataList;
-
-	// Filter for map assets in the [ServerMapsDirectory]
-	FARFilter Filter;
-	Filter.ClassNames.Add(UWorld::StaticClass()->GetFName());
-	FString MapsPath = FString::Printf(TEXT("/Game/%s"), *ServerMapsDirectory);
-	Filter.PackagePaths.Add(FName(*MapsPath));
-	Filter.bRecursivePaths = true;
-
-	AssetRegistryModule.Get().GetAssets(Filter, AssetDataList);
-
-	for (const FAssetData& AssetData : AssetDataList)
+	if (Combo_Maps)
 	{
-		FString CurMapName = AssetData.AssetName.ToString();
-		ServerMaps.AddUnique(CurMapName);
-		Combo_Maps->AddOption(FormatMapName(CurMapName, false));
-	}
+		bool AnyMaps = MenuHelper::PopulateMapComboBox(Combo_Maps, false);
 
-	if (Combo_Maps->GetOptionCount() <= 0)
+		if (!AnyMaps)
+		{
+			HostButton->SetIsEnabled(false);
+		}
+	}
+}
+
+void UHostMenu::FillGameModesDropdown()
+{
+	if (Combo_GameMode)
 	{
-		// No options were added, warn the player
-		FString Message = FString::Format(TEXT("Please add maps to Content/{0} Directory"), { ServerMapsDirectory });
-		Combo_Maps->AddOption(Message);
-		HostButton->SetIsEnabled(false); // Keep Host Button disabled, as there are no valid maps to host
+		MenuHelper::PopulateGameModeComboBox(Combo_GameMode, false);
 	}
-
-	Combo_Maps->SetSelectedIndex(0);
-
 }
 
 void UHostMenu::OnCreateSession(bool bWasSuccessful)
@@ -99,7 +89,7 @@ void UHostMenu::OnCreateSession(bool bWasSuccessful)
 		if (World)
 		{
 			// Build our map path and travel to it as a listen server
-			auto PathToLobby = FString::Printf(TEXT("/Game/%s/%s?listen"), *ServerMapsDirectory, *FormatMapName(MapName, true));
+			auto PathToLobby = FString::Printf(TEXT("/Game/%s/%s?listen"), *ServerMapsDirectory, *MenuHelper::FormatMapName(MapName, true));
 			World->ServerTravel(PathToLobby);
 		}
 	}
@@ -116,20 +106,6 @@ void UHostMenu::OnCreateSession(bool bWasSuccessful)
 		}
 
 		EnableControls(true);
-	}
-}
-
-/* Format map name by preserving its literal name or by replacing underscores with whitespace for readability. Note that this enforces a particular naming scheme for Server Maps to display spaces properly. */
-FString UHostMenu::FormatMapName(const FString& OriginalName, bool bReturnLiteralName)
-{
-	FString FormattedName = OriginalName;
-	if (bReturnLiteralName)
-	{
-		return FormattedName.Replace(TEXT(" "), TEXT("_"));
-	}
-	else
-	{
-		return FormattedName.Replace(TEXT("_"), TEXT(" "));
 	}
 }
 
