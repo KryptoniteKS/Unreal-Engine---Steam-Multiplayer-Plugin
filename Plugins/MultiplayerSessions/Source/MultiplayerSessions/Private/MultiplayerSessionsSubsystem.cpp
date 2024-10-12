@@ -55,6 +55,13 @@ void UMultiplayerSessionsSubsystem::CreateSession(FString MapName, FString Lobby
 	LastSessionSettings->Set(FName("GameMode"), GameMode, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Game Mode key/value pair
 	LastSessionSettings->BuildUniqueId = 1; // Used to keep different builds from seeing each other during searches
 
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		15.f,
+		FColor::Magenta,
+		FString::Format(TEXT("Hosted with map name: {0}"), { MapName })
+	);
+
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
 	{

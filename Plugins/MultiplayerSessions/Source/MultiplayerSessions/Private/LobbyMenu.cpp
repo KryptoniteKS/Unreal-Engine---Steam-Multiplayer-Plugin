@@ -83,29 +83,47 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 		FString(TEXT("Finding sessions..."))
 	);
 
+	FString SelectedGameMode = Combo_GameModes->GetSelectedOption();
+	FString SelectedLobbyName = TextSearch_Lobby->GetText().ToString().TrimStartAndEnd();
+	FString SelectedMapName = MenuHelper::FormatMapName(Combo_Maps->GetSelectedOption(), true);
+	FString AllOption = MenuHelper::GetAllOption();
+
 	for (auto Result : SessionResults)
 	{
-		FString GameMode;
-		FString LobbyName;
-		FString MapName;
+		FString ServerGameMode;
+		FString ServerLobbyName;
+		FString ServerMapName;
+
 		bool FoundMatchingSession = true;
-		Result.Session.SessionSettings.Get(FName("GameMode"), GameMode); // Gets the GameMode of the sessions and outputs it to GameMode
-		Result.Session.SessionSettings.Get(FName("LobbyName"), LobbyName); // Gets the LobbyName of the sessions and outputs it to LobbyName
-		Result.Session.SessionSettings.Get(FName("MapName"), MapName); // Gets the MapName of the sessions and outputs it to MapName
-		MapName = MenuHelper::FormatMapName(MapName, true);
 
-		if (Combo_GameModes->GetSelectedOption() != MenuHelper::GetAllOption() && Combo_GameModes->GetSelectedOption() != GameMode)
+		Result.Session.SessionSettings.Get(FName("GameMode"), ServerGameMode); // Gets the GameMode of the sessions and outputs it to ServerGameMode
+		Result.Session.SessionSettings.Get(FName("LobbyName"), ServerLobbyName); // Gets the LobbyName of the sessions and outputs it to ServerLobbyName
+		Result.Session.SessionSettings.Get(FName("MapName"), ServerMapName); // Gets the MapName of the sessions and outputs it to ServerMapName
+
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Magenta,
+			FString::Format(TEXT("Server Map Name: {0} || Selected Map Name: {1}"), { ServerMapName, SelectedMapName })
+		);
+
+		if (!SelectedGameMode.Equals(AllOption) && !SelectedGameMode.Equals(ServerGameMode))
 		{
 			FoundMatchingSession = false;
 		}
 
-		if (Combo_Maps->GetSelectedOption() != MenuHelper::GetAllOption() && Combo_Maps->GetSelectedOption() != MapName)
+		if (!SelectedMapName.Equals(AllOption) && !SelectedMapName.Equals(ServerMapName))
 		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString::Format(TEXT("Did not find matching Map Name for server map {0} and selected map {1}"), { ServerMapName, SelectedMapName})
+			);
 			FoundMatchingSession = false;
 		}
 
-		FString SearchText = TextSearch_Lobby->GetText().ToString().TrimStartAndEnd();
-		if (!SearchText.IsEmpty() && !LobbyName.Contains(SearchText, ESearchCase::IgnoreCase))
+		if (!SelectedLobbyName.IsEmpty() && !ServerLobbyName.Contains(SelectedLobbyName, ESearchCase::IgnoreCase))
 		{
 			FoundMatchingSession = false;
 		}
@@ -136,7 +154,7 @@ void ULobbyMenu::AddSession(USessionEntry* Session)
 
 void ULobbyMenu::ClearSessions()
 {
-	// TODO
+	ScrollBox_Sessions->ClearChildren();
 }
 
 // Callback function for when a session entry button is clicked
@@ -197,11 +215,12 @@ void ULobbyMenu::JoinButtonClicked()
 
 void ULobbyMenu::SearchButtonClicked()
 {
-	/* Call FindSessions on the MultiplayerSessionsSubsystem. */
 	SearchButton->SetIsEnabled(false);
+	ClearSessions();
 	if (MultiplayerSessionsSubsystem)
 	{
-		MultiplayerSessionsSubsystem->FindSessions(10000);
+		// This will eventually trigger our callback on this class: OnFindSessions()
+		MultiplayerSessionsSubsystem->FindSessions(1000);
 	}
 }
 
