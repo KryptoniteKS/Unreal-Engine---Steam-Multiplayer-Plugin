@@ -13,6 +13,7 @@ const TArray<FString> MenuHelper::GameModes = {
 	TEXT("King of the Hill"),
 	TEXT("Team Deathmatch")
 };
+const FString MenuHelper::AllOption = TEXT("<All>");
 
 /* Populates a game mode combo box with all game modes defined in the MenuHelper class.
 Optionally includes an option for "<All>". */
@@ -20,7 +21,7 @@ void MenuHelper::PopulateGameModeComboBox(UComboBoxString* Combo_GameModes, bool
 {
 	if (bIncludeAllOption) 
 	{
-		Combo_GameModes->AddOption(TEXT("<All>"));
+		Combo_GameModes->AddOption(AllOption);
 	}
 
 	for (const FString& GameMode : GameModes)
@@ -41,7 +42,7 @@ bool MenuHelper::PopulateMapComboBox(UComboBoxString* Combo_Maps, bool bIncludeA
 {
 	if (bIncludeAllOption)
 	{
-		Combo_Maps->AddOption(TEXT("<All>"));
+		Combo_Maps->AddOption(AllOption);
 	}
 
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
@@ -91,4 +92,9 @@ FString MenuHelper::FormatMapName(const FString& OriginalName, bool bReturnLiter
 	{
 		return FormattedName.Replace(TEXT("_"), TEXT(" "));
 	}
+}
+
+FString MenuHelper::GetAllOption()
+{
+	return AllOption;
 }

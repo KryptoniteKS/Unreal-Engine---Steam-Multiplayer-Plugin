@@ -11,6 +11,8 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSubsystem.h"
 #include "MenuHelper.h"
+#include "Components/ComboBoxString.h"
+#include "Components/EditableTextBox.h"
 
 bool ULobbyMenu::Initialize()
 {
@@ -84,17 +86,33 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 	for (auto Result : SessionResults)
 	{
 		FString GameMode;
-		Result.Session.SessionSettings.Get(FName("GameMode"), GameMode); // Gets the GameMode of the sessions and outputs it to SettingsValue
-		if (GameMode == "Free For All")
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Green,
-				FString(TEXT("Successfully found a session. Attempting to add it to the list..."))
-			);
+		FString LobbyName;
+		FString MapName;
+		bool FoundMatchingSession = true;
+		Result.Session.SessionSettings.Get(FName("GameMode"), GameMode); // Gets the GameMode of the sessions and outputs it to GameMode
+		Result.Session.SessionSettings.Get(FName("LobbyName"), LobbyName); // Gets the LobbyName of the sessions and outputs it to LobbyName
+		Result.Session.SessionSettings.Get(FName("MapName"), MapName); // Gets the MapName of the sessions and outputs it to MapName
+		MapName = MenuHelper::FormatMapName(MapName, true);
 
-			// If we have found a session that matches our defined MatchType, let's add it to the list.
+		if (Combo_GameModes->GetSelectedOption() != MenuHelper::GetAllOption() && Combo_GameModes->GetSelectedOption() != GameMode)
+		{
+			FoundMatchingSession = false;
+		}
+
+		if (Combo_Maps->GetSelectedOption() != MenuHelper::GetAllOption() && Combo_Maps->GetSelectedOption() != MapName)
+		{
+			FoundMatchingSession = false;
+		}
+
+		FString SearchText = TextSearch_Lobby->GetText().ToString().TrimStartAndEnd();
+		if (!SearchText.IsEmpty() && !LobbyName.Contains(SearchText, ESearchCase::IgnoreCase))
+		{
+			FoundMatchingSession = false;
+		}
+		
+		if (FoundMatchingSession)
+		{
+			// If we have found a session that matches our filters, let's add it to the list.
 			USessionEntry* NewSession = CreateWidget<USessionEntry>(this, SessionEntryClass);
 			NewSession->SetSessionSearchResult(Result);
 			NewSession->SessionEntrySetup();

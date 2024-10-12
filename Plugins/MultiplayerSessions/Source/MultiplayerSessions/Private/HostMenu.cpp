@@ -130,7 +130,7 @@ void UHostMenu::BackButtonClicked()
 void UHostMenu::HostButtonClicked()
 {
 	// Grab our data from the controls
-	MapName = Combo_Maps->GetSelectedOption();
+	MapName = MenuHelper::FormatMapName(Combo_Maps->GetSelectedOption(), true);
 	LobbyName = Text_LobbyName->GetText().ToString();
 	GameMode = Combo_GameMode->GetSelectedOption();
 	MaxNumPlayers = FCString::Atoi(*Text_NumPlayers->GetText().ToString()); // Convert Text to FString to CString to Int32
