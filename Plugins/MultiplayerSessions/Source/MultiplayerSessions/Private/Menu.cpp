@@ -16,7 +16,7 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
-	bIsFocusable = true;
+	//bIsFocusable = true;
 
 	UWorld* World = GetWorld();
 	if (World)
@@ -41,8 +41,8 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 	if (MultiplayerSessionsSubsystem)
 	{
 		// Bind our menu's callback functions to our custom MultiplayerSessionsSubsystem delegates
-		MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
-		MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
+		//MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
+		//MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
 		MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
 		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &ThisClass::OnDestroySession);
 		MultiplayerSessionsSubsystem->MultiplayerOnStartSessionComplete.AddDynamic(this, &ThisClass::OnStartSession);
@@ -171,24 +171,32 @@ void UMenu::OnStartSession(bool bWasSuccessful)
 {
 }
 
+UButton* UMenu::GetJoinButton()
+{
+	return JoinButton;
+}
+
 void UMenu::HostButtonClicked()
 {
-	HostButton->SetIsEnabled(false);
+	//HostButton->SetIsEnabled(false);
 
-	if (MultiplayerSessionsSubsystem)
+	/*if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
-	}
+	}*/
+
+	OnHostButtonClickedDelegate.Broadcast();
 }
 
 void UMenu::JoinButtonClicked()
 {
-	JoinButton->SetIsEnabled(false);
-
-	if (MultiplayerSessionsSubsystem)
-	{
-		MultiplayerSessionsSubsystem->FindSessions(10000);
-	}
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		15.f,
+		FColor::Red,
+		FString(TEXT("Broadcasting click event..."))
+	);
+	OnJoinButtonClickedDelegate.Broadcast();
 }
 
 void UMenu::MenuTearDown()

@@ -25,7 +25,7 @@ public:
 	UMultiplayerSessionsSubsystem();
 
 	/* To handle Session functionality. The Menu class will call these */
-	void CreateSession(int32 NumPublicConnections, FString MatchType);
+	void CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
 	void FindSessions(int32 MaxSearchResults);
 	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
 	void DestroySession();
@@ -45,9 +45,6 @@ protected:
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnStartSessionComplete(FName SessionName, bool bWasSuccessful);
-
-
-
 
 private:
 	IOnlineSessionPtr SessionInterface;
@@ -73,7 +70,9 @@ private:
 	FDelegateHandle StartSessionCompleteDelegateHandle;
 
 	bool bCreateSessionOnDestroy{ false };
-	int32 LastNumPublicConnections;
-	FString LastMatchType;
+	int32 LastMaxNumPlayers;
+	FString LastGameMode;
+	FString LastMapName;
+	FString LastLobbyName;
 
 };
