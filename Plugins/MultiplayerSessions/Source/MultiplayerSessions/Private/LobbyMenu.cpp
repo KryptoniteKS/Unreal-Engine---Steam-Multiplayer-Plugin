@@ -13,6 +13,7 @@
 #include "MenuHelper.h"
 #include "Components/ComboBoxString.h"
 #include "Components/EditableTextBox.h"
+#include "Components/CheckBox.h"
 
 bool ULobbyMenu::Initialize()
 {
@@ -86,6 +87,7 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 	FString SelectedGameMode = Combo_GameModes->GetSelectedOption();
 	FString SelectedLobbyName = TextSearch_Lobby->GetText().ToString().TrimStartAndEnd();
 	FString SelectedMapName = MenuHelper::FormatMapName(Combo_Maps->GetSelectedOption(), true);
+	bool ShowFullLobbies = Check_ShowFullLobbies->GetCheckedState() == ECheckBoxState::Checked;
 	FString AllOption = MenuHelper::GetAllOption();
 
 	for (auto Result : SessionResults)
@@ -93,6 +95,8 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 		FString ServerGameMode;
 		FString ServerLobbyName;
 		FString ServerMapName;
+		int32 maxPlayers = Result.Session.SessionSettings.NumPublicConnections;
+		int32 numPlayers = maxPlayers - Result.Session.NumOpenPublicConnections;
 
 		bool FoundMatchingSession = true;
 
@@ -114,12 +118,11 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 
 		if (!SelectedMapName.Equals(AllOption) && !SelectedMapName.Equals(ServerMapName))
 		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Red,
-				FString::Format(TEXT("Did not find matching Map Name for server map {0} and selected map {1}"), { ServerMapName, SelectedMapName})
-			);
+			FoundMatchingSession = false;
+		}
+
+		if (!ShowFullLobbies && numPlayers >= maxPlayers)
+		{
 			FoundMatchingSession = false;
 		}
 
