@@ -104,13 +104,6 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 		Result.Session.SessionSettings.Get(FName("LobbyName"), ServerLobbyName); // Gets the LobbyName of the sessions and outputs it to ServerLobbyName
 		Result.Session.SessionSettings.Get(FName("MapName"), ServerMapName); // Gets the MapName of the sessions and outputs it to ServerMapName
 
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Magenta,
-			FString::Format(TEXT("Server Map Name: {0} || Selected Map Name: {1}"), { ServerMapName, SelectedMapName })
-		);
-
 		if (!SelectedGameMode.Equals(AllOption) && !SelectedGameMode.Equals(ServerGameMode))
 		{
 			FoundMatchingSession = false;
@@ -144,7 +137,7 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 		}
 	}
 
-	// If we have not joined a session after looping through all the session results, re-enable the Join button
+	// After looping through all the results, re-enable the Search button
 	SearchButton->SetIsEnabled(true);
 }
 
