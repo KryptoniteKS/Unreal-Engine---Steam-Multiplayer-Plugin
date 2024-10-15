@@ -190,12 +190,6 @@ void UMenu::HostButtonClicked()
 
 void UMenu::JoinButtonClicked()
 {
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		15.f,
-		FColor::Red,
-		FString(TEXT("Broadcasting click event..."))
-	);
 	OnJoinButtonClickedDelegate.Broadcast();
 }
 

@@ -46,9 +46,13 @@ public:
 private:
 	/* Widget Controls */
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UTextBlock* Text_HostName;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UTextBlock* Text_LobbyName;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UTextBlock* Text_MapName;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
+	class UTextBlock* Text_GameMode;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))
 	class UTextBlock* Text_NumPlayers;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), meta = (AllowPrivateAccess = "true"))

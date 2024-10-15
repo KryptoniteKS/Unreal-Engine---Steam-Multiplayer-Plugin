@@ -31,13 +31,6 @@ bool UHostMenu::Initialize()
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
 		if (MultiplayerSessionsSubsystem)
 		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Yellow,
-				FString(TEXT("Multiplayer Session Subsystem successfully initialized on the Host Menu."))
-			);
-
 			MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
 		}
 	}
