@@ -18,6 +18,8 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	{
 		SessionInterface = Subsystem->GetSessionInterface();
 	}
+
+	SteamAPI_Init();
 }
 
 void UMultiplayerSessionsSubsystem::CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers)

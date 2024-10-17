@@ -5,6 +5,12 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
+THIRD_PARTY_INCLUDES_START
+#include <steam/steam_api.h>
+#include <steam/isteammatchmaking.h>
+#include <steam/isteamuser.h>
+#include <steam/isteamfriends.h>
+THIRD_PARTY_INCLUDES_END
 
 #include "MultiplayerSessionsSubsystem.generated.h"
 
