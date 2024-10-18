@@ -1,3 +1,6 @@
+*** NEEDS TO BE UPDATED SINCE LAST MERGE - THE BELOW INSTRUCTIONS ARE NO LONGER APPLICABLE. ***
+*** IF YOU ARE FAMILIAR WITH UNREAL ENGINE, ALL YOU NEED TO DO IS ADD THE MENU SWITCHER TO VIEWPORT AND YOU ARE GOOD TO GO. ***
+
 This Unreal Engine project is the creation of a plugin that enables multiplayer functionality for any Unreal Engine game. The plugin establishes a server connection between players on a map of your choosing.
 Simply click Host and you can Host a level of your choosing on a listen server.
 
