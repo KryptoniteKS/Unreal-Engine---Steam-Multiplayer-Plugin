@@ -178,29 +178,6 @@ UButton* UMenu::GetJoinButton()
 
 void UMenu::HostButtonClicked()
 {
-	// Will be NULL if not playing in a packaged build through Steam
-	if (SteamFriends() && SteamUser())
-	{
-		// Gets the Steam ID and Steam Name of current user and prints it
-		const char* personaName = SteamFriends()->GetPersonaName();
-		FString steamName = UTF8_TO_TCHAR(personaName);
-		auto userId = SteamUser()->GetSteamID().ConvertToUint64();
-
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::MakeRandomColor(),
-			FString::Printf(TEXT("Steam ID: %llu"), userId)
-		);
-
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::MakeRandomColor(),
-			FString::Format(TEXT("Steam Name: {0}"), { steamName })
-		);
-	}
-
 	OnHostButtonClickedDelegate.Broadcast();
 }
 
