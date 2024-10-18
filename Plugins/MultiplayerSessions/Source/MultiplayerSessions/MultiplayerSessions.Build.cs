@@ -52,7 +52,13 @@ public class MultiplayerSessions : ModuleRules
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...
-			}
+            }
 			);
-	}
+
+        PublicDefinitions.Add("WITH_ENGINE_STEAM=1");
+        PublicDefinitions.Add("WITH_STEAMKIT=1");
+        PublicDefinitions.Add("ONLINESUBSYSTEMSTEAM_PACKAGE=1");
+        AddEngineThirdPartyPrivateStaticDependencies(Target, "Steamworks");
+
+    }
 }
