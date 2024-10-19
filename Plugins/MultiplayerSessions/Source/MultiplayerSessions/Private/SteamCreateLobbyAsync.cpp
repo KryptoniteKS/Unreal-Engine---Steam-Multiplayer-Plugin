@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SteamCreateLobbyAsync.h"
 
 USteamCreateLobbyAsync* USteamCreateLobbyAsync::CreateLobby(int32 MaxNumPlayers, TEnumAsByte<ESteamLobbyType> LobbyType)
@@ -56,10 +55,10 @@ void USteamCreateLobbyAsync::Activate()
     }
 
     // Call the Create Lobby function on Steam API
-    SteamCreateLobbyCallbackHandle = SteamMatchmaking()->CreateLobby(static_cast<ELobbyType>(SteamLobbyType.GetValue()), LobbyMaxPlayers);
+    CreateLobbyCallbackHandle = SteamMatchmaking()->CreateLobby(static_cast<ELobbyType>(SteamLobbyType.GetValue()), LobbyMaxPlayers);
 
     // If the API call was invalid for any reason, broadcast a failure
-    if (SteamCreateLobbyCallbackHandle == k_uAPICallInvalid)
+    if (CreateLobbyCallbackHandle == k_uAPICallInvalid)
     {
         OnFailure.Broadcast(ESteamResult::ResultFail, FSteamId(0));
         SetReadyToDestroy();
@@ -68,5 +67,5 @@ void USteamCreateLobbyAsync::Activate()
     }
 
     // If all succeeds, bind our callback function to Steam's call result. This ensures OnCreateLobbyCallback() is called and its LobbyCreated_t parameter is populated
-    OnCreateLobbyCallResult.Set(SteamCreateLobbyCallbackHandle, this, &ThisClass::OnCreateLobbyCallback);
+    CreateLobbyCallResult.Set(CreateLobbyCallbackHandle, this, &ThisClass::OnCreateLobbyCallback);
 }

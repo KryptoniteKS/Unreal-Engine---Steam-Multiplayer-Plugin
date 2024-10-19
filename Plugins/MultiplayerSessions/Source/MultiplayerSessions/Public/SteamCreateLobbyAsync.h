@@ -21,7 +21,7 @@ class MULTIPLAYERSESSIONS_API USteamCreateLobbyAsync : public UBlueprintAsyncAct
 	
 public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Create Steam Lobby", meta = (BlueprintInternalUseOnly = "true"), Category = "Steam Matchmaking")
-	static class USteamCreateLobbyAsync* CreateLobby(int32 MaxNumPlayers, TEnumAsByte<ESteamLobbyType> LobbyType);
+	static USteamCreateLobbyAsync* CreateLobby(int32 MaxNumPlayers, TEnumAsByte<ESteamLobbyType> LobbyType);
 
 	UPROPERTY(BlueprintAssignable)
 	FCreateLobbyDelegate OnSuccess;
@@ -29,17 +29,20 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FCreateLobbyDelegate OnFailure;
 
+protected:
+	/* This method is automatically called when an instance of USteamCreateLobbyAsync is instantiated. This is inherited behavior from UBlueprintAsyncActionBase */
+	virtual void Activate() override;
+
 private:
 	int32 LobbyMaxPlayers;
 	TEnumAsByte<ESteamLobbyType> SteamLobbyType;
-	SteamAPICall_t SteamCreateLobbyCallbackHandle; // Callback handle return type for Steam's CreateLobby() method
-	CCallResult<USteamCreateLobbyAsync, LobbyCreated_t> OnCreateLobbyCallResult; // Essentially a delegate handle we can use to add our callback function to Steam's 'delegate list'
+	SteamAPICall_t CreateLobbyCallbackHandle; // Callback handle return type for Steam's CreateLobby() method
+	CCallResult<USteamCreateLobbyAsync, LobbyCreated_t> CreateLobbyCallResult; // Essentially a delegate handle we can use to add our callback function to Steam's 'delegate list'
 
 	/* Our custom callback function that will be called if Steam's CreateLobby function call is successful. Must be bound using our CCallResult.Set() */
 	void OnCreateLobbyCallback(LobbyCreated_t* LobbyCreated, bool bIOFailure);
 
-	/* This method is automatically called when an instance of USteamCreateLobbyAsync is instantiated. This is inherited behavior from UBlueprintAsyncActionBase */
-	virtual void Activate() override;
+
 
 
 };

@@ -19,6 +19,16 @@ enum ESteamLobbyType
 	LobbyTypeInvisible = 3 UMETA(DisplayName = "Invisible"),
 };
 
+/* https://partner.steamgames.com/doc/api/ISteamMatchmaking#ELobbyDistanceFilter */
+UENUM(BlueprintType)
+enum ESteamLobbyDistanceFilter
+{
+	LobbyDistanceFilterClose = 0 UMETA(DisplayName = "Close"),
+	LobbyDistanceFilterDefault = 1 UMETA(DisplayName = "Default"),
+	LobbyDistanceFilterFar = 2 UMETA(DisplayName = "Far"),
+	LobbyDistanceFilterWorldwide = 3 UMETA(DisplayName = "Worldwide"),
+};
+
 /* https://partner.steamgames.com/doc/api/steam_api#CSteamID */
 USTRUCT(BlueprintType)
 struct FSteamId
