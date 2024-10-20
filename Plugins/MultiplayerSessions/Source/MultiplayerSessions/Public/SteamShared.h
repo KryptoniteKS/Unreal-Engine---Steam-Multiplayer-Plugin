@@ -71,6 +71,56 @@ struct FSteamId
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FSteamAppId
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "Steam Integration Kit")
+	int32 AppID = 0;
+
+	FSteamAppId()
+	{
+		AppID = 0;
+	}
+	FSteamAppId(AppId_t AppID)
+	{
+		this->AppID = AppID;
+	}
+	AppId_t GetAppID() const
+	{
+		return AppID;
+	}
+};
+
+UENUM(BlueprintType)
+enum ESteamLobbyComparisonType
+{
+	LobbyComparisonEqualToOrLessThan = 0 UMETA(DisplayName = "Equal To Or Less Than"),
+	LobbyComparisonLessThan = 1 UMETA(DisplayName = "Less Than"),
+	LobbyComparisonEqualTo = 2 UMETA(DisplayName = "Equal To"),
+	LobbyComparisonGreaterThan = 3 UMETA(DisplayName = "Greater Than"),
+	LobbyComparisonEqualToOrGreaterThan = 4 UMETA(DisplayName = "Equal To Or Greater Than"),
+	LobbyComparisonNotEqualTo = 5 UMETA(DisplayName = "Not Equal To"),
+};
+
+UENUM(BlueprintType)
+enum ESteamLobbyChatEntryType
+{
+	ChatEntryTypeInvalid = 0 UMETA(DisplayName = "Invalid"),
+	ChatEntryTypeChatMsg = 1 UMETA(DisplayName = "Chat Message"),
+	ChatEntryTypeTyping = 2 UMETA(DisplayName = "Typing"),
+	ChatEntryTypeInviteGame = 3 UMETA(DisplayName = "Invite Game"),
+	ChatEntryTypeEmote = 4 UMETA(DisplayName = "Emote"),
+	ChatEntryTypeLeftConversation = 6 UMETA(DisplayName = "Left Conversation"),
+	ChatEntryTypeEntered = 7 UMETA(DisplayName = "Entered"),
+	ChatEntryTypeWasKicked = 8 UMETA(DisplayName = "Was Kicked"),
+	ChatEntryTypeWasBanned = 9 UMETA(DisplayName = "Was Banned"),
+	ChatEntryTypeDisconnected = 10 UMETA(DisplayName = "Disconnected"),
+	ChatEntryTypeHistoricalChat = 11 UMETA(DisplayName = "Historical Chat"),
+	ChatEntryTypeLinkBlocked = 14 UMETA(DisplayName = "Link Blocked"),
+};
+
 UENUM(BlueprintType)
 enum ESteamResult
 {
