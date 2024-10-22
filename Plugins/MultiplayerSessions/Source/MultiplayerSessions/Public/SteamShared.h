@@ -71,12 +71,13 @@ struct FSteamId
 	}
 };
 
+/* https://partner.steamgames.com/doc/api/steam_api#AppId_t */
 USTRUCT(BlueprintType)
 struct FSteamAppId
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, Category = "Steam Integration Kit")
+	UPROPERTY(BlueprintReadWrite, Category = "Steam Interface")
 	int32 AppID = 0;
 
 	FSteamAppId()
@@ -93,8 +94,9 @@ struct FSteamAppId
 	}
 };
 
+/* https://partner.steamgames.com/doc/api/ISteamMatchmaking#ELobbyComparison */
 UENUM(BlueprintType)
-enum ESteamLobbyComparisonType
+enum ESteamLobbyComparison
 {
 	LobbyComparisonEqualToOrLessThan = 0 UMETA(DisplayName = "Equal To Or Less Than"),
 	LobbyComparisonLessThan = 1 UMETA(DisplayName = "Less Than"),
@@ -104,6 +106,7 @@ enum ESteamLobbyComparisonType
 	LobbyComparisonNotEqualTo = 5 UMETA(DisplayName = "Not Equal To"),
 };
 
+/* https://partner.steamgames.com/doc/api/steam_api#EChatEntryType */
 UENUM(BlueprintType)
 enum ESteamLobbyChatEntryType
 {
@@ -121,6 +124,7 @@ enum ESteamLobbyChatEntryType
 	ChatEntryTypeLinkBlocked = 14 UMETA(DisplayName = "Link Blocked"),
 };
 
+/* https://partner.steamgames.com/doc/api/steam_api#EResult */
 UENUM(BlueprintType)
 enum ESteamResult
 {

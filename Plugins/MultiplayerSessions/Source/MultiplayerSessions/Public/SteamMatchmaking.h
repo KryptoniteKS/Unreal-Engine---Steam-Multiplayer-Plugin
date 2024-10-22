@@ -36,58 +36,58 @@ public:
 	static int32 AddFavoriteGame(FSteamAppId AppID, FString IP, int32 ConnPort, int32 QueryPort, TArray<int32> Flags, int32 Time32LastPlayedOnServer);
 
 	/*
-	Adds a compatible members filter to the lobby list request.
+	NOTE: This method is currently unsupported. Adds a compatible members filter to the lobby list request. Must be called before RequestLobbyList
 	@param SteamID - The Steam ID of the user to check compatibility.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName = "Add Request Lobby List Compatible Members Filter", meta = (Keywords = "AddRequestLobbyListCompatibleMembersFilter"), Category = "Steam Matchmaking")
 	static void AddRequestLobbyListCompatibleMembersFilter(FSteamId SteamID);
 
 	/*
-	Adds a distance filter to the lobby list request.
+	Adds a distance filter to the lobby list request. Must be called before RequestLobbyList
 	@param LobbyDistanceFilter - The distance filter to use.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName = "Add Request Lobby List Distance Filter", meta = (Keywords = "AddRequestLobbyListDistanceFilter"), Category = "Steam Matchmaking")
 	static void AddRequestLobbyListDistanceFilter(TEnumAsByte<ESteamLobbyDistanceFilter> LobbyDistanceFilter);
 
 	/*
-	Adds a slots available filter to the lobby list request.
+	Adds a slots available filter to the lobby list request. Must be called before RequestLobbyList
 	@param SlotsAvailable - The minimum number of slots available.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName = "Add Request Lobby List Filter Slots Available", meta = (Keywords = "AddRequestLobbyListFilterSlotsAvailable"), Category = "Steam Matchmaking")
 	static void AddRequestLobbyListFilterSlotsAvailable(int32 SlotsAvailable);
 
 	/*
-	Adds a near value filter to the lobby list request.
-	@param KeyToMatch - The key to match.
-	@param ValueToBeCloseTo - The value to be close to.
+	Adds a near value filter to the lobby list request. Must be called before RequestLobbyList
+	@param KeyToMatch - The filter key name to match.
+	@param ValueToBeCloseTo - The value that lobbies will be sorted on. Lobbies closer to this value take precedence (they are sorted/returned first).
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName = "Add Request Lobby List Near Value Filter", meta = (Keywords = "AddRequestLobbyListNearValueFilter"), Category = "Steam Matchmaking")
 	static void AddRequestLobbyListNearValueFilter(FString KeyToMatch, int32 ValueToBeCloseTo);
 
 	/*
-	Adds a numerical filter to the lobby list request.
+	Adds a numerical filter to the lobby list request. Must be called before RequestLobbyList
 	@param KeyToMatch - The key to match.
 	@param ValueToMatch - The value to match.
 	@param ComparisonType - The comparison type to use.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName = "Add Request Lobby List Numerical Filter", meta = (Keywords = "AddRequestLobbyListNumericalFilter"), Category = "Steam Matchmaking")
-	static void AddRequestLobbyListNumericalFilter(FString KeyToMatch, int32 ValueToMatch, TEnumAsByte<ESteamLobbyComparisonType> ComparisonType);
+	static void AddRequestLobbyListNumericalFilter(FString KeyToMatch, int32 ValueToMatch, TEnumAsByte<ESteamLobbyComparison> ComparisonType);
 
 	/*
-	Adds a result count filter to the lobby list request.
+	Adds a result count filter to the lobby list request. Must be called before RequestLobbyList
 	@param MaxResults - The maximum number of results to return.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName = "Add Request Lobby List Result Count Filter", meta = (Keywords = "AddRequestLobbyListResultCountFilter"), Category = "Steam Matchmaking")
 	static void AddRequestLobbyListResultCountFilter(int32 MaxResults);
 
 	/*
-	Adds a string filter to the lobby list request.
+	Adds a string filter to the lobby list request. Must be called before RequestLobbyList
 	@param KeyToMatch - The key to match.
 	@param ValueToMatch - The value to match.
 	@param ComparisonType - The comparison type to use.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName = "Add Request Lobby List String Filter", meta = (Keywords = "AddRequestLobbyListStringFilter"), Category = "Steam Matchmaking")
-	static void AddRequestLobbyListStringFilter(FString KeyToMatch, FString ValueToMatch, TEnumAsByte<ESteamLobbyComparisonType> ComparisonType);
+	static void AddRequestLobbyListStringFilter(FString KeyToMatch, FString ValueToMatch, TEnumAsByte<ESteamLobbyComparison> ComparisonType);
 
 	/*
 	Deletes a lobby data key.
@@ -148,7 +148,7 @@ public:
 	static FString GetLobbyData(FSteamId LobbyID, FString Key);
 
 	/*
-	Gets a lobby data key-value pair by index.
+	Gets a lobby data key-value pair by index. Must call GetLobbyDataCount before calling this.
 	@param LobbyID - The Steam ID of the lobby.
 	@param DataIndex - The index of the data pair.
 	@param Key - The key of the data pair.
