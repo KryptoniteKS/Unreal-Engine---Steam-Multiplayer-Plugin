@@ -5,7 +5,9 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
 #include "Online/OnlineSessionNames.h"
+#include "SteamRequestLobbyListAsync.h"
 #include "SteamCreateLobbyAsync.h"
+#include "SteamMatchmaking.h"
 
 UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete)),
@@ -85,13 +87,6 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	LastSessionSearch->TimeoutInSeconds = 30.f;
 
-
-	if (SteamMatchmaking())
-	{
-		// Allow us to search for sessions all over the globe - must be called before FindSessions
-		SteamMatchmaking()->AddRequestLobbyListDistanceFilter(ELobbyDistanceFilter::k_ELobbyDistanceFilterWorldwide);
-	}
-
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController(); // need this to get the FUniqueNetID
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
 	{
@@ -155,6 +150,48 @@ void UMultiplayerSessionsSubsystem::DestroySession()
 
 void UMultiplayerSessionsSubsystem::StartSession()
 {
+}
+
+void UMultiplayerSessionsSubsystem::RequestLobbyList()
+{
+	auto Lobby = USteamRequestLobbyListAsync::RequestLobbyList();
+	Lobby->OnSuccess.AddDynamic(this, &ThisClass::OnRequestLobbyList);
+	Lobby->OnFailure.AddDynamic(this, &ThisClass::OnRequestLobbyList);
+}
+
+void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
+{
+	if (LobbiesMatching < 0)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("Request Lobby List failed!"))
+		);
+
+		return;
+	}
+
+	// Loop through the sessions by using GetLobbyByIndex
+	for (int curLobby = 0; curLobby < LobbiesMatching - 1; curLobby++)
+	{
+		auto LobbyId = USteamMatchmaking::GetLobbyByIndex(curLobby);
+
+		FLobbyEntry LobbyEntry;
+		LobbyEntry.LobbyID = FSteamId(LobbyId);
+		LobbyEntry.MaxPlayers = USteamMatchmaking::GetLobbyMemberLimit(LobbyId);
+		LobbyEntry.NumPlayers = USteamMatchmaking::GetNumLobbyMembers(LobbyId);
+		LobbyEntry.Ping = 72;
+		LobbyEntry.HostName = TEXT("Bestest Host");
+		LobbyEntry.GameMode = TEXT("Best Game Mode!");
+		LobbyEntry.LobbyName = TEXT("Second Best Lobby");
+		LobbyEntry.MapName = TEXT("Bestest Map");
+
+		// After we have created our structs, add them to a list to be broadcast at the end of the loop. LobbyMenu will subscribe to this
+
+	}
+	
 }
 
 void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)

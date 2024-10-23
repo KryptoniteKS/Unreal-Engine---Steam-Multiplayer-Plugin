@@ -210,7 +210,7 @@ bool USteamMatchmaking::RequestLobbyData(FSteamId LobbyID)
 		return false;
 	}
 
-	SteamMatchmaking()->RequestLobbyData(LobbyID.GetSteamID());
+	return SteamMatchmaking()->RequestLobbyData(LobbyID.GetSteamID());
 }
 
 bool USteamMatchmaking::SendLobbyChatMessage(FSteamId LobbyID, FString Message)
@@ -229,7 +229,7 @@ bool USteamMatchmaking::SetLobbyData(FSteamId LobbyID, FString Key, FString Valu
 		return false;
 	}
 
-	SteamMatchmaking()->SetLobbyData(LobbyID.GetSteamID(), TCHAR_TO_ANSI(*Key), TCHAR_TO_ANSI(*Value));
+	return SteamMatchmaking()->SetLobbyData(LobbyID.GetSteamID(), TCHAR_TO_ANSI(*Key), TCHAR_TO_ANSI(*Value));
 }
 
 void USteamMatchmaking::SetLobbyGameServer(FSteamId LobbyID, FString ServerIP, int32 ServerPort, FSteamId SteamID)

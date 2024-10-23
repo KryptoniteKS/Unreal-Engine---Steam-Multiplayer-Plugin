@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "OnlineSessionSettings.h"
+#include "SteamShared.h"
 #include "SessionEntry.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSessionSelected, class USessionEntry*, Session);
@@ -21,6 +22,7 @@ public:
 
 	/* Public Getters/Setters */
 	class UButton* GetSessionEntryButton();
+	FSteamId GetLobbyId() const { return LobbyId; }
 
 	/* Delegates */
 	FOnSessionSelected OnSessionSelectedDelegate;
@@ -62,4 +64,5 @@ private:
 
 	/* Networking Variables */
 	FOnlineSessionSearchResult SessionSearchResult;
+	FSteamId LobbyId;
 };

@@ -9,6 +9,8 @@
 
 #include "SteamShared.generated.h"
 
+
+
 /* https://partner.steamgames.com/doc/api/ISteamMatchmaking#ELobbyType */
 UENUM(BlueprintType)
 enum ESteamLobbyType
@@ -69,6 +71,30 @@ struct FSteamId
 		SteamID.SetFromUint64(Result);
 		return SteamID;
 	}
+};
+
+USTRUCT(BlueprintType)
+struct FLobbyEntry
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSteamId LobbyID;
+	UPROPERTY()
+	FString HostName;
+	UPROPERTY()
+	FString LobbyName;
+	UPROPERTY()
+	FString MapName;
+	UPROPERTY()
+	FString GameMode;
+	UPROPERTY()
+	int32 NumPlayers;
+	UPROPERTY()
+	int32 MaxPlayers;
+	UPROPERTY()
+	int32 Ping;
+
 };
 
 /* https://partner.steamgames.com/doc/api/steam_api#AppId_t */
