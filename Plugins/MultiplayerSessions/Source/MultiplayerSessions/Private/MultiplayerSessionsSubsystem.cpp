@@ -157,6 +157,7 @@ void UMultiplayerSessionsSubsystem::RequestLobbyList()
 	auto Lobby = USteamRequestLobbyListAsync::RequestLobbyList();
 	Lobby->OnSuccess.AddDynamic(this, &ThisClass::OnRequestLobbyList);
 	Lobby->OnFailure.AddDynamic(this, &ThisClass::OnRequestLobbyList);
+	Lobby->Activate();
 }
 
 void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
@@ -173,7 +174,14 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 		return;
 	}
 
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		15.f,
+		FColor::Red,
+		FString(TEXT("Looping through lobbies..."))
+	);
 	// Loop through the sessions by using GetLobbyByIndex
+	TArray<FLobbyEntry> LobbyData;
 	for (int curLobby = 0; curLobby < LobbiesMatching - 1; curLobby++)
 	{
 		auto LobbyId = USteamMatchmaking::GetLobbyByIndex(curLobby);
@@ -189,8 +197,27 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 		LobbyEntry.MapName = TEXT("Bestest Map");
 
 		// After we have created our structs, add them to a list to be broadcast at the end of the loop. LobbyMenu will subscribe to this
-
+		LobbyData.Add(LobbyEntry);
 	}
+
+	
+	if (LobbyData.Num() > 0)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("At least 1 lobby found and created a session entry widget for it."))
+		);
+	}
+
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		15.f,
+		FColor::Red,
+		FString(TEXT("Broadcasting Lobby Data..."))
+	);
+	OnRequestLobbyListComplete.Broadcast(LobbyData);
 	
 }
 

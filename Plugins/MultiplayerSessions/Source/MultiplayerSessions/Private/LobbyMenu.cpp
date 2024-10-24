@@ -46,6 +46,7 @@ bool ULobbyMenu::Initialize()
 		if (MultiplayerSessionsSubsystem)
 		{
 			MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
+			MultiplayerSessionsSubsystem->OnRequestLobbyListComplete.AddDynamic(this, &ThisClass::OnRequestLobbyList);
 			//MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
 		}
 	}
@@ -68,6 +69,30 @@ void ULobbyMenu::FillGameModeComboBox()
 	{
 		MenuHelper::PopulateGameModeComboBox(Combo_GameModes, true);
 	}
+}
+
+void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		15.f,
+		FColor::Red,
+		FString(TEXT("Lobby Data Received!"))
+	);
+
+	for (auto LobbyEntry : LobbyData)
+	{
+		USessionEntry* NewSession = CreateWidget<USessionEntry>(this, SessionEntryClass);
+		NewSession->SetLobbyEntry(LobbyEntry);
+		NewSession->LobbyEntrySetup();
+		NewSession->GetSessionEntryButton()->SetStyle(NormalButtonStyle);
+
+		NewSession->OnSessionSelectedDelegate.AddDynamic(this, &ThisClass::OnSessionEntrySelected);
+		AddSession(NewSession);
+	}
+
+	// After looping through all the results, re-enable the Search button
+	SearchButton->SetIsEnabled(true);
 }
 
 void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
@@ -216,7 +241,8 @@ void ULobbyMenu::SearchButtonClicked()
 	if (MultiplayerSessionsSubsystem)
 	{
 		// This will eventually trigger our callback on this class: OnFindSessions()
-		MultiplayerSessionsSubsystem->FindSessions(1000);
+		//MultiplayerSessionsSubsystem->FindSessions(1000);
+		MultiplayerSessionsSubsystem->RequestLobbyList();
 	}
 }
 

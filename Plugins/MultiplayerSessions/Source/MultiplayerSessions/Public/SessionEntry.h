@@ -19,6 +19,8 @@ public:
 	/* Initialization Logic */
 	UFUNCTION(BlueprintCallable)
 	void SessionEntrySetup();
+	UFUNCTION(BlueprintCallable)
+	void LobbyEntrySetup(); // New SessionEntrySetup
 
 	/* Public Getters/Setters */
 	class UButton* GetSessionEntryButton();
@@ -43,6 +45,7 @@ public:
 
 	/* SessionSearchResult Getter and Setter */
 	void SetSessionSearchResult(const FOnlineSessionSearchResult& SearchResult) { SessionSearchResult = SearchResult; }
+	void SetLobbyEntry(const FLobbyEntry& LobbyToSet) { LobbyEntry = LobbyToSet; }
 	const FOnlineSessionSearchResult& GetSessionSearchResult() const { return SessionSearchResult; }
 
 private:
@@ -64,5 +67,6 @@ private:
 
 	/* Networking Variables */
 	FOnlineSessionSearchResult SessionSearchResult;
+	FLobbyEntry LobbyEntry;
 	FSteamId LobbyId;
 };

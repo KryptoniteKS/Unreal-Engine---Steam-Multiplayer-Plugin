@@ -21,6 +21,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnFindSessionsComplete, const T
 DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnJoinSessionComplete, EOnJoinSessionCompleteResult::Type Result);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnDestroySessionComplete, bool, bWasSuccessful);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnStartSessionComplete, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestLobbyListComplete, const TArray<FLobbyEntry>&, LobbyData);
 
 
 UCLASS()
@@ -40,12 +41,13 @@ public:
 	void RequestLobbyList();
 	void OnRequestLobbyList(int32 LobbiesMatching);
 
-	/* Our own custom delegates for the Menu class to bind callbacks to */
+	/* Our own custom delegates for the Menu classes to bind callbacks to */
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
 	FMultiplayerOnFindSessionsComplete MultiplayerOnFindSessionsComplete;
 	FMultiplayerOnJoinSessionComplete MultiplayerOnJoinSessionComplete;
 	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
+	FOnRequestLobbyListComplete OnRequestLobbyListComplete;
 
 protected:
 	/* Internal callbacks for the delegates we will add to the Online Session Interface delegate list. These don't need to be called outside this class. */

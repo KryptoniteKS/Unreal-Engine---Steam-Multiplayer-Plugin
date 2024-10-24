@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "SteamShared.h"
 #include "LobbyMenu.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyMenuBackButtonClicked);
@@ -43,6 +44,7 @@ protected:
 
 	/* Custom Callbacks */
 	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
+	void OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData);
 
 private:
 	/* Widget Controls */

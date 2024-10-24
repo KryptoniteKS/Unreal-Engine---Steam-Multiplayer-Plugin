@@ -6,6 +6,31 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
+void USessionEntry::LobbyEntrySetup()
+{
+	if (LobbyEntry.LobbyID.Result == FSteamId(0).Result)
+	{
+		// We have an invalid session entry. We can't work with this
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("Setting up entry listing, but LobbyEntry was not valid."))
+		);
+		return;
+	}
+
+	Text_HostName->SetText(FText::FromString(LobbyEntry.HostName));
+	Text_LobbyName->SetText(FText::FromString(LobbyEntry.LobbyName));
+	Text_MapName->SetText(FText::FromString(LobbyEntry.MapName));
+	Text_GameMode->SetText(FText::FromString(LobbyEntry.GameMode));
+	Text_Ping->SetText(FText::AsNumber(LobbyEntry.Ping));
+	Text_NumPlayers->SetText(FText::Format(FText::FromString(TEXT("{0}/{1}")), FText::AsNumber(LobbyEntry.NumPlayers), FText::AsNumber(LobbyEntry.MaxPlayers)));
+
+	// Bind button click callback
+	Button_SessionEntry->OnPressed.AddDynamic(this, &ThisClass::OnSessionSelected);
+}
+
 void USessionEntry::SessionEntrySetup()
 {
 	if (SessionSearchResult.IsValid() && Text_HostName && Text_LobbyName && Text_MapName && Text_NumPlayers && Text_Ping)

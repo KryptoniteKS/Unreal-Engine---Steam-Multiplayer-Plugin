@@ -29,8 +29,6 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FCreateLobbyDelegate OnFailure;
 
-protected:
-	/* This method is automatically called when an instance of USteamCreateLobbyAsync is instantiated. This is inherited behavior from UBlueprintAsyncActionBase */
 	virtual void Activate() override;
 
 private:
