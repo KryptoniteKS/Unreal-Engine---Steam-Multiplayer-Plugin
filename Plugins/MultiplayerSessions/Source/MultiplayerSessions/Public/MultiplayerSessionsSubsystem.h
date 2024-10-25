@@ -38,7 +38,9 @@ public:
 	void DestroySession();
 	void StartSession();
 
+	UFUNCTION()
 	void RequestLobbyList();
+	UFUNCTION()
 	void OnRequestLobbyList(int32 LobbiesMatching);
 
 	/* Our own custom delegates for the Menu classes to bind callbacks to */
@@ -85,5 +87,8 @@ private:
 	FString LastGameMode;
 	FString LastMapName;
 	FString LastLobbyName;
+
+	UPROPERTY()
+	class USteamRequestLobbyListAsync* SteamRequestLobbyListAsync;
 
 };

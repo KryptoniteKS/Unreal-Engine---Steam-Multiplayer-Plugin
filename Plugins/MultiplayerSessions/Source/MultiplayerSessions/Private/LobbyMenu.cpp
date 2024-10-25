@@ -77,7 +77,7 @@ void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
 		-1,
 		15.f,
 		FColor::Red,
-		FString(TEXT("Lobby Data Received!"))
+		FString(TEXT("Lobby Data Received! Creating widget..."))
 	);
 
 	for (auto LobbyEntry : LobbyData)

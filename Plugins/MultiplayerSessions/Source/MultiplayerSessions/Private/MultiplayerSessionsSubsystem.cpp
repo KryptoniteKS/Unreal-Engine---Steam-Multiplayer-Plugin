@@ -22,6 +22,18 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 		SessionInterface = Subsystem->GetSessionInterface();
 	}
 
+	SteamRequestLobbyListAsync = NewObject<USteamRequestLobbyListAsync>();
+	if (SteamRequestLobbyListAsync != nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Binding Delegates from SteamRequestLobbyListAsync"));
+		SteamRequestLobbyListAsync->OnSuccess.AddDynamic(this, &ThisClass::OnRequestLobbyList);
+		SteamRequestLobbyListAsync->OnFailure.AddDynamic(this, &ThisClass::OnRequestLobbyList);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("SteamRequestLobbyListAsync was null!"));
+	}
+
 	SteamAPI_Init();
 }
 
@@ -154,10 +166,7 @@ void UMultiplayerSessionsSubsystem::StartSession()
 
 void UMultiplayerSessionsSubsystem::RequestLobbyList()
 {
-	auto Lobby = USteamRequestLobbyListAsync::RequestLobbyList();
-	Lobby->OnSuccess.AddDynamic(this, &ThisClass::OnRequestLobbyList);
-	Lobby->OnFailure.AddDynamic(this, &ThisClass::OnRequestLobbyList);
-	Lobby->Activate();
+	SteamRequestLobbyListAsync->RequestLobbyList();
 }
 
 void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
@@ -207,7 +216,7 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 			-1,
 			15.f,
 			FColor::Red,
-			FString(TEXT("At least 1 lobby found and created a session entry widget for it."))
+			FString(TEXT("At least 1 lobby found."))
 		);
 	}
 

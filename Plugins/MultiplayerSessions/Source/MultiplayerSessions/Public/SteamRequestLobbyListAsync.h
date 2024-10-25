@@ -15,21 +15,19 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestLobbyList, int32, LobbiesMatching);
 
 UCLASS()
-class MULTIPLAYERSESSIONS_API USteamRequestLobbyListAsync : public UBlueprintAsyncActionBase
+class MULTIPLAYERSESSIONS_API USteamRequestLobbyListAsync : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable, DisplayName = "Request Lobby List", meta = (BlueprintInternalUseOnly = "true"), Category = "Steam Matchmaking")
-	static USteamRequestLobbyListAsync* RequestLobbyList();
-
 	UPROPERTY(BlueprintAssignable)
 	FOnRequestLobbyList OnSuccess;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnRequestLobbyList OnFailure;
 
-	virtual void Activate() override;
+	UFUNCTION(BlueprintCallable, DisplayName = "Request Lobby List", meta = (BlueprintInternalUseOnly = "true"), Category = "Steam Matchmaking")
+	void RequestLobbyList();
 
 private:
 	void OnLobbyListReceived(LobbyMatchList_t* LobbyMatches, bool bIOFailure);

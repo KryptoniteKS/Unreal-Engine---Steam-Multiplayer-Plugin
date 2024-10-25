@@ -3,19 +3,6 @@
 #include "SteamRequestLobbyListAsync.h"
 #include "SteamMatchmaking.h"
 
-USteamRequestLobbyListAsync* USteamRequestLobbyListAsync::RequestLobbyList()
-{
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		15.f,
-		FColor::Orange,
-		FString(TEXT("Call was made to RequestLobbyListAsync."))
-	);
-	// Causes Activate() to trigger
-	USteamRequestLobbyListAsync* LobbyRequest = NewObject<USteamRequestLobbyListAsync>();
-	return LobbyRequest; 
-}
-
 void USteamRequestLobbyListAsync::OnLobbyListReceived(LobbyMatchList_t* LobbyMatches, bool bIOFailure)
 {
 	GEngine->AddOnScreenDebugMessage(
@@ -34,32 +21,22 @@ void USteamRequestLobbyListAsync::OnLobbyListReceived(LobbyMatchList_t* LobbyMat
 		}
 		else
 		{
+
+			// Broadcast number of lobbies found - we must iterate over these with SteamMatchmaking()->GetLobbyByIndex()
+			auto numLobbies = static_cast<int32>(Result.m_nLobbiesMatching);
 			GEngine->AddOnScreenDebugMessage(
 				-1,
 				15.f,
 				FColor::Red,
 				FString(TEXT("Successfully returned lobbies from Steam API. Broadcasting..."))
 			);
-
-			// Broadcast number of lobbies found - we must iterate over these with SteamMatchmaking()->GetLobbyByIndex()
-			OnSuccess.Broadcast(Result.m_nLobbiesMatching);
+			OnSuccess.Broadcast(numLobbies);
 		}
 	});
-
-	SetReadyToDestroy();
-	MarkAsGarbage();
 }
 
-void USteamRequestLobbyListAsync::Activate()
+void USteamRequestLobbyListAsync::RequestLobbyList()
 {
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		15.f,
-		FColor::Red,
-		FString(TEXT("Calling Super::Activate()"))
-	);
-	Super::Activate();
-
 	// If we are not connected to SteamMatchmaking, broadcast failure
 	if (!SteamMatchmaking())
 	{
@@ -71,8 +48,6 @@ void USteamRequestLobbyListAsync::Activate()
 		);
 
 		OnFailure.Broadcast(-1);
-		SetReadyToDestroy();
-		MarkAsGarbage();
 		return;
 	}
 
@@ -82,6 +57,7 @@ void USteamRequestLobbyListAsync::Activate()
 		FColor::Red,
 		FString(TEXT("Steam Matchmaking was not null! Adding Request Filter..."))
 	);
+
 	// Limit search results to first 5000 lobbies
 	USteamMatchmaking::AddRequestLobbyListResultCountFilter(5000);
 
@@ -99,8 +75,6 @@ void USteamRequestLobbyListAsync::Activate()
 	if (RequestLobbyCallbackHandle == k_uAPICallInvalid)
 	{
 		OnFailure.Broadcast(-1);
-		SetReadyToDestroy();
-		MarkAsGarbage();
 		return;
 	}
 	

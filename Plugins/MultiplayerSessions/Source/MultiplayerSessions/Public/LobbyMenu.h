@@ -44,6 +44,7 @@ protected:
 
 	/* Custom Callbacks */
 	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
+	UFUNCTION()
 	void OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData);
 
 private:
