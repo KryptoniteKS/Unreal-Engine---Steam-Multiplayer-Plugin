@@ -25,7 +25,6 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	SteamRequestLobbyListAsync = NewObject<USteamRequestLobbyListAsync>();
 	if (SteamRequestLobbyListAsync != nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Binding Delegates from SteamRequestLobbyListAsync"));
 		SteamRequestLobbyListAsync->OnSuccess.AddDynamic(this, &ThisClass::OnRequestLobbyList);
 		SteamRequestLobbyListAsync->OnFailure.AddDynamic(this, &ThisClass::OnRequestLobbyList);
 	}
@@ -196,7 +195,7 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 		auto LobbyId = USteamMatchmaking::GetLobbyByIndex(curLobby);
 
 		FLobbyEntry LobbyEntry;
-		LobbyEntry.LobbyID = FSteamId(LobbyId);
+		LobbyEntry.LobbyID = LobbyId;
 		LobbyEntry.MaxPlayers = USteamMatchmaking::GetLobbyMemberLimit(LobbyId);
 		LobbyEntry.NumPlayers = USteamMatchmaking::GetNumLobbyMembers(LobbyId);
 		LobbyEntry.Ping = 72;

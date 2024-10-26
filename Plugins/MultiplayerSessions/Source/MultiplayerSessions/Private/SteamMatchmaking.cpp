@@ -95,7 +95,7 @@ int32 USteamMatchmaking::GetFavoriteGameCount()
 
 FSteamId USteamMatchmaking::GetLobbyByIndex(int32 LobbyIndex)
 {
-	return FSteamId();
+	return FSteamId(SteamMatchmaking()->GetLobbyByIndex(LobbyIndex));
 }
 
 void USteamMatchmaking::GetLobbyChatEntry(FSteamId SteamID, int32 ChatID, FSteamId& SteamIDUser, FString& ChatEntry, TEnumAsByte<ESteamLobbyChatEntryType>& ChatEntryType)
