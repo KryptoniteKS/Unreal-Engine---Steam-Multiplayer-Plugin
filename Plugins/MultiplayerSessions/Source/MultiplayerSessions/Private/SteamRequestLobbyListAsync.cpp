@@ -60,6 +60,7 @@ void USteamRequestLobbyListAsync::RequestLobbyList()
 
 	// Limit search results to first 5000 lobbies
 	USteamMatchmaking::AddRequestLobbyListResultCountFilter(5000);
+	USteamMatchmaking::AddRequestLobbyListFilterSlotsAvailable(0);
 
 	GEngine->AddOnScreenDebugMessage(
 		-1,

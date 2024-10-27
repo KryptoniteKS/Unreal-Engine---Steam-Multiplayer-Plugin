@@ -14,6 +14,7 @@
 #include "Components/ComboBoxString.h"
 #include "Components/EditableTextBox.h"
 #include "Components/CheckBox.h"
+#include "SteamMatchmaking.h"
 
 bool ULobbyMenu::Initialize()
 {
@@ -240,6 +241,22 @@ void ULobbyMenu::SearchButtonClicked()
 	ClearSessions();
 	if (MultiplayerSessionsSubsystem)
 	{
+		// Add our filters, if they exist
+		auto SelectedMap = Combo_Maps->GetSelectedOption();
+		auto SelectedGameMode = Combo_GameModes->GetSelectedOption();
+		auto AllOption = MenuHelper::GetAllOption();
+		// If we are not filtering by ALL maps, filter by the specific map
+		if (!SelectedMap.Equals(AllOption))
+		{
+			auto MapNameKey = MultiplayerSessionsSubsystem->GetMapNameKey();
+			USteamMatchmaking::AddRequestLobbyListStringFilter(MapNameKey, SelectedMap, ESteamLobbyComparison::LobbyComparisonEqualTo);
+		}
+		// If we are not filtering by ALL game modes, filter by the specific game mode
+		if (!SelectedGameMode.Equals(AllOption))
+		{
+			auto GameModeKey = MultiplayerSessionsSubsystem->GetGameModeKey();
+			USteamMatchmaking::AddRequestLobbyListStringFilter(GameModeKey, SelectedGameMode, ESteamLobbyComparison::LobbyComparisonEqualTo);
+		}
 		// This will eventually trigger our callback on this class: OnFindSessions()
 		//MultiplayerSessionsSubsystem->FindSessions(1000);
 		MultiplayerSessionsSubsystem->RequestLobbyList();

@@ -95,6 +95,11 @@ int32 USteamMatchmaking::GetFavoriteGameCount()
 
 FSteamId USteamMatchmaking::GetLobbyByIndex(int32 LobbyIndex)
 {
+	if (!SteamMatchmaking())
+	{
+		return FSteamId(0);
+	}
+
 	return FSteamId(SteamMatchmaking()->GetLobbyByIndex(LobbyIndex));
 }
 
@@ -106,7 +111,7 @@ FString USteamMatchmaking::GetLobbyData(FSteamId LobbyID, FString Key)
 {
 	if (!SteamMatchmaking())
 	{
-		return TEXT("");
+		return TEXT("N/A");
 	}
 
 	return FString(SteamMatchmaking()->GetLobbyData(LobbyID.GetSteamID(), TCHAR_TO_ANSI(*Key)));
@@ -170,7 +175,12 @@ int32 USteamMatchmaking::GetLobbyMemberLimit(FSteamId LobbyID)
 
 FSteamId USteamMatchmaking::GetLobbyOwner(FSteamId LobbyID)
 {
-	return FSteamId();
+	if (!SteamMatchmaking())
+	{
+		return FSteamId(0);
+	}
+
+	return SteamMatchmaking()->GetLobbyOwner(LobbyID.GetSteamID());
 }
 
 int32 USteamMatchmaking::GetNumLobbyMembers(FSteamId LobbyID)

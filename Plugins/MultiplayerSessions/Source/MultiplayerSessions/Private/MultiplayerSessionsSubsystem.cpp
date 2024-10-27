@@ -66,10 +66,16 @@ void UMultiplayerSessionsSubsystem::CreateSession(FString MapName, FString Lobby
 	LastSessionSettings->bShouldAdvertise = true; // allows steam to advertise the session so others can find and join
 	LastSessionSettings->bUsesPresence = true; // allows us to use presence in order to find sessions going on in our region
 	LastSessionSettings->bUseLobbiesIfAvailable = true; // required for some reason - need more research
-	LastSessionSettings->Set(FName("MapName"), MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Map Name key/value pair
-	LastSessionSettings->Set(FName("LobbyName"), LobbyName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Map Name key/value pair
-	LastSessionSettings->Set(FName("GameMode"), GameMode, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Game Mode key/value pair
+	LastSessionSettings->Set(FName(Key_MapName), MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Map Name key/value pair
+	LastSessionSettings->Set(FName(Key_LobbyName), LobbyName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Map Name key/value pair
+	LastSessionSettings->Set(FName(Key_GameMode), GameMode, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing); // set the Game Mode key/value pair
 	LastSessionSettings->BuildUniqueId = 1; // Used to keep different builds from seeing each other during searches
+
+	if (SteamFriends())
+	{
+		FString hostName = UTF8_TO_TCHAR(SteamFriends()->GetPersonaName());
+		LastSessionSettings->Set(FName(Key_HostName), hostName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	}
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
@@ -199,10 +205,10 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 		LobbyEntry.MaxPlayers = USteamMatchmaking::GetLobbyMemberLimit(LobbyId);
 		LobbyEntry.NumPlayers = USteamMatchmaking::GetNumLobbyMembers(LobbyId);
 		LobbyEntry.Ping = 72;
-		LobbyEntry.HostName = TEXT("Bestest Host");
-		LobbyEntry.GameMode = TEXT("Best Game Mode!");
-		LobbyEntry.LobbyName = TEXT("Second Best Lobby");
-		LobbyEntry.MapName = TEXT("Bestest Map");
+		LobbyEntry.HostName = USteamMatchmaking::GetLobbyData(LobbyId, Key_HostName);
+		LobbyEntry.GameMode = USteamMatchmaking::GetLobbyData(LobbyId, Key_GameMode);
+		LobbyEntry.LobbyName = USteamMatchmaking::GetLobbyData(LobbyId, Key_LobbyName);
+		LobbyEntry.MapName = USteamMatchmaking::GetLobbyData(LobbyId, Key_MapName);
 
 		// After we have created our structs, add them to a list to be broadcast at the end of the loop. LobbyMenu will subscribe to this
 		LobbyData.Add(LobbyEntry);

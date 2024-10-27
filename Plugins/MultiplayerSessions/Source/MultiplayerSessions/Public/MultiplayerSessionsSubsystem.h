@@ -39,6 +39,13 @@ public:
 	void StartSession();
 
 	UFUNCTION()
+	FString GetMapNameKey() { return Key_MapName; }
+	UFUNCTION()
+	FString GetLobbyNameKey() { return Key_LobbyName; }
+	UFUNCTION()
+	FString GetGameModeKey() { return Key_GameMode; }
+
+	UFUNCTION()
 	void RequestLobbyList();
 	UFUNCTION()
 	void OnRequestLobbyList(int32 LobbiesMatching);
@@ -87,6 +94,11 @@ private:
 	FString LastGameMode;
 	FString LastMapName;
 	FString LastLobbyName;
+
+	FString Key_MapName = TEXT("MapName");
+	FString Key_LobbyName = TEXT("LobbyName");
+	FString Key_GameMode = TEXT("GameMode");
+	FString Key_HostName = TEXT("HostName");
 
 	UPROPERTY()
 	class USteamRequestLobbyListAsync* SteamRequestLobbyListAsync;
