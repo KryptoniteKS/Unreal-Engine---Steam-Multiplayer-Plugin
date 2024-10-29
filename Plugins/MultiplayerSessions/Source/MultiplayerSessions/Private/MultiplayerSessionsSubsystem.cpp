@@ -32,8 +32,39 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	{
 		UE_LOG(LogTemp, Error, TEXT("SteamRequestLobbyListAsync was null!"));
 	}
+	SteamCreateLobbyAsync = NewObject<USteamCreateLobbyAsync>();
+	if (SteamCreateLobbyAsync != nullptr)
+	{
+		SteamCreateLobbyAsync->OnSuccess.AddDynamic(this, &ThisClass::OnCreateLobby);
+		SteamCreateLobbyAsync->OnFailure.AddDynamic(this, &ThisClass::OnCreateLobby);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("SteamCreateLobbyAsync was null!"));
+	}
 
 	SteamAPI_Init();
+}
+
+void UMultiplayerSessionsSubsystem::CreateLobby(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers)
+{
+	if (SteamMatchmaking() == nullptr || SteamFriends() == nullptr)
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Setting local lobby metadata on the Subsystem..."));
+
+	LobbyMetadata.Reset();
+
+	LobbyMetadata.GameMode = GameMode;
+	LobbyMetadata.MapName = MapName;
+	LobbyMetadata.LobbyName = LobbyName;
+	LobbyMetadata.MaxNumPlayers = MaxNumPlayers;
+	LobbyMetadata.HostName = ANSI_TO_TCHAR(SteamFriends()->GetPersonaName()); // TODO: Create my own interface
+
+	// Do I need to call this on the GameThread??
+	SteamCreateLobbyAsync->CreateLobby(MaxNumPlayers, ESteamLobbyType::LobbyTypePublic);
 }
 
 void UMultiplayerSessionsSubsystem::CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers)
@@ -233,6 +264,29 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 	);
 	OnRequestLobbyListComplete.Broadcast(LobbyData);
 	
+}
+
+void UMultiplayerSessionsSubsystem::OnCreateLobby(TEnumAsByte<ESteamResult> Result, FSteamId LobbyID)
+{
+	UE_LOG(LogTemp, Warning, TEXT("CreateLobby broadcast received by our Subsystem."));
+
+	// Look at result. Set Lobby Metadata if good. Otherwise, broadcast failure
+	if (Result == ESteamResult::ResultOK)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Result from CreateLobby was good. Setting Lobby Metadata now..."));
+
+		// Set metadata
+		USteamMatchmaking::SetLobbyData(LobbyID, Key_GameMode, LobbyMetadata.GameMode);
+		USteamMatchmaking::SetLobbyData(LobbyID, Key_LobbyName, LobbyMetadata.LobbyName);
+		USteamMatchmaking::SetLobbyData(LobbyID, Key_MapName, LobbyMetadata.MapName);
+		USteamMatchmaking::SetLobbyData(LobbyID, Key_HostName, LobbyMetadata.HostName);
+
+		OnCreateLobbyComplete.Broadcast(true);
+	}
+	else
+	{
+		OnCreateLobbyComplete.Broadcast(false);
+	}
 }
 
 void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)

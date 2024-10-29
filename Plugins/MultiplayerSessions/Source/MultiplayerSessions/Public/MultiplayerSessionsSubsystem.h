@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "SteamShared.h"
 THIRD_PARTY_INCLUDES_START
 #include <steam/steam_api.h>
 #include <steam/isteammatchmaking.h>
@@ -22,6 +23,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnJoinSessionComplete, EOnJoinSe
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnDestroySessionComplete, bool, bWasSuccessful);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnStartSessionComplete, bool, bWasSuccessful);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestLobbyListComplete, const TArray<FLobbyEntry>&, LobbyData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateLobbyComplete, bool, bWasSuccessful);
 
 
 UCLASS()
@@ -33,6 +35,7 @@ public:
 
 	/* To handle Session functionality. The Menu class will call these */
 	void CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
+	void CreateLobby(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
 	void FindSessions(int32 MaxSearchResults);
 	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
 	void DestroySession();
@@ -49,6 +52,8 @@ public:
 	void RequestLobbyList();
 	UFUNCTION()
 	void OnRequestLobbyList(int32 LobbiesMatching);
+	UFUNCTION()
+	void OnCreateLobby(TEnumAsByte<ESteamResult> Result, FSteamId LobbyID);
 
 	/* Our own custom delegates for the Menu classes to bind callbacks to */
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
@@ -57,6 +62,7 @@ public:
 	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
 	FOnRequestLobbyListComplete OnRequestLobbyListComplete;
+	FOnCreateLobbyComplete OnCreateLobbyComplete;
 
 protected:
 	/* Internal callbacks for the delegates we will add to the Online Session Interface delegate list. These don't need to be called outside this class. */
@@ -102,5 +108,11 @@ private:
 
 	UPROPERTY()
 	class USteamRequestLobbyListAsync* SteamRequestLobbyListAsync;
+	UPROPERTY()
+	class USteamCreateLobbyAsync* SteamCreateLobbyAsync;
 
+	UPROPERTY()
+	FSteamId CurrentLobbyId; // Only supports one single lobby right now. Steam supports one player owning multiple lobbies, so may need to implement later
+	UPROPERTY()
+	FLobbyMetadata LobbyMetadata; // Lobby metadata to be set on the lobby currently being created
 };

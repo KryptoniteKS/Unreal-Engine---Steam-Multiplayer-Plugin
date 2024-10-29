@@ -75,6 +75,7 @@ void USteamMatchmaking::AddRequestLobbyListStringFilter(FString KeyToMatch, FStr
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Steam backend filtering for Key: %hs, Value: %hs"), TCHAR_TO_ANSI(*KeyToMatch), TCHAR_TO_ANSI(*ValueToMatch));
 	SteamMatchmaking()->AddRequestLobbyListStringFilter(TCHAR_TO_ANSI(*KeyToMatch), TCHAR_TO_ANSI(*ValueToMatch), static_cast<ELobbyComparison>(ComparisonType.GetValue()));
 }
 

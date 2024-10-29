@@ -32,6 +32,7 @@ bool UHostMenu::Initialize()
 		if (MultiplayerSessionsSubsystem)
 		{
 			MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
+			MultiplayerSessionsSubsystem->OnCreateLobbyComplete.AddDynamic(this, &ThisClass::OnCreateLobby);
 		}
 	}
 
@@ -61,6 +62,44 @@ void UHostMenu::FillGameModesDropdown()
 	if (Combo_GameMode)
 	{
 		MenuHelper::PopulateGameModeComboBox(Combo_GameMode, false);
+	}
+}
+
+void UHostMenu::OnCreateLobby(bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Green,
+				FString(TEXT("Lobby created Successfully. Traveling to game server..."))
+			);
+		}
+
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			// Build our map path and travel to it as a listen server
+			auto PathToLobby = FString::Printf(TEXT("/Game/%s/%s?listen"), *ServerMapsDirectory, *MenuHelper::FormatMapName(MapName, true));
+			World->ServerTravel(PathToLobby);
+		}
+	}
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString(TEXT("Failed to create lobby."))
+			);
+		}
+
+		EnableControls(true);
 	}
 }
 
@@ -138,7 +177,8 @@ void UHostMenu::HostButtonClicked()
 	if (MultiplayerSessionsSubsystem)
 	{
 		EnableControls(false); // Disable controls to prevent overloading the subsystem with session requests
-		MultiplayerSessionsSubsystem->CreateSession(MapName, LobbyName, GameMode, MaxNumPlayers);
+		//MultiplayerSessionsSubsystem->CreateSession(MapName, LobbyName, GameMode, MaxNumPlayers);
+		MultiplayerSessionsSubsystem->CreateLobby(MapName, LobbyName, GameMode, MaxNumPlayers);
 	}
 }
 

@@ -249,12 +249,14 @@ void ULobbyMenu::SearchButtonClicked()
 		if (!SelectedMap.Equals(AllOption))
 		{
 			auto MapNameKey = MultiplayerSessionsSubsystem->GetMapNameKey();
+			UE_LOG(LogTemp, Warning, TEXT("Filtering for MapNameKey: %s, Value: %s"), *MapNameKey, *SelectedMap);
 			USteamMatchmaking::AddRequestLobbyListStringFilter(MapNameKey, SelectedMap, ESteamLobbyComparison::LobbyComparisonEqualTo);
 		}
 		// If we are not filtering by ALL game modes, filter by the specific game mode
 		if (!SelectedGameMode.Equals(AllOption))
 		{
 			auto GameModeKey = MultiplayerSessionsSubsystem->GetGameModeKey();
+			UE_LOG(LogTemp, Warning, TEXT("Filtering for GameModeKey: %s, Value: %s"), *GameModeKey, *SelectedGameMode);
 			USteamMatchmaking::AddRequestLobbyListStringFilter(GameModeKey, SelectedGameMode, ESteamLobbyComparison::LobbyComparisonEqualTo);
 		}
 		// This will eventually trigger our callback on this class: OnFindSessions()

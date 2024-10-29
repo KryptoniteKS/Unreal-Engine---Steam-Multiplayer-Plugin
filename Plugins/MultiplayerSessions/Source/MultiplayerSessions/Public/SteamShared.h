@@ -74,6 +74,32 @@ struct FSteamId
 };
 
 USTRUCT(BlueprintType)
+struct FLobbyMetadata
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString MapName = TEXT("N/A");
+	UPROPERTY()
+	FString LobbyName = TEXT("N/A");
+	UPROPERTY()
+	FString GameMode = TEXT("N/A");
+	UPROPERTY()
+	FString HostName = TEXT("N/A");
+	UPROPERTY()
+	int32 MaxNumPlayers = 0;
+
+	void Reset()
+	{
+		MapName = TEXT("N/A");
+		LobbyName = TEXT("N/A");
+		GameMode = TEXT("N/A");
+		HostName = TEXT("N/A");
+		MaxNumPlayers = 0;
+	}
+};
+
+USTRUCT(BlueprintType)
 struct FLobbyEntry
 {
 	GENERATED_BODY()
@@ -124,12 +150,12 @@ struct FSteamAppId
 UENUM(BlueprintType)
 enum ESteamLobbyComparison
 {
-	LobbyComparisonEqualToOrLessThan = 0 UMETA(DisplayName = "Equal To Or Less Than"),
-	LobbyComparisonLessThan = 1 UMETA(DisplayName = "Less Than"),
-	LobbyComparisonEqualTo = 2 UMETA(DisplayName = "Equal To"),
-	LobbyComparisonGreaterThan = 3 UMETA(DisplayName = "Greater Than"),
-	LobbyComparisonEqualToOrGreaterThan = 4 UMETA(DisplayName = "Equal To Or Greater Than"),
-	LobbyComparisonNotEqualTo = 5 UMETA(DisplayName = "Not Equal To"),
+	LobbyComparisonEqualToOrLessThan = -2 UMETA(DisplayName = "Equal To Or Less Than"),
+	LobbyComparisonLessThan = -1 UMETA(DisplayName = "Less Than"),
+	LobbyComparisonEqualTo = 0 UMETA(DisplayName = "Equal To"),
+	LobbyComparisonGreaterThan = 1 UMETA(DisplayName = "Greater Than"),
+	LobbyComparisonEqualToOrGreaterThan = 2 UMETA(DisplayName = "Equal To Or Greater Than"),
+	LobbyComparisonNotEqualTo = 3 UMETA(DisplayName = "Not Equal To"),
 };
 
 /* https://partner.steamgames.com/doc/api/steam_api#EChatEntryType */
