@@ -46,6 +46,7 @@ protected:
 	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
 	UFUNCTION()
 	void OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData);
+	void OnJoinLobby(bool bWasSuccessful);
 
 private:
 	/* Widget Controls */

@@ -306,6 +306,24 @@ enum ESteamResult
 	ResultNoVerifiedPhone = 123,				// account does not have a verified phone number
 };
 
+UENUM(BlueprintType)
+enum ESteamChatRoomEnterResponse
+{
+	None = 0 UMETA(DisplayName = "None"),
+	ChatRoomEnterResponseSuccess = 1 UMETA(DisplayName = "Success"),
+	ChatRoomEnterResponseDoesntExist = 2 UMETA(DisplayName = "Doesn't Exist"),
+	ChatRoomEnterResponseNotAllowed = 3 UMETA(DisplayName = "Not Allowed"),
+	ChatRoomEnterResponseFull = 4 UMETA(DisplayName = "Full"),
+	ChatRoomEnterResponseError = 5 UMETA(DisplayName = "Error"),
+	ChatRoomEnterResponseBanned = 6 UMETA(DisplayName = "Banned"),
+	ChatRoomEnterResponseLimited = 7 UMETA(DisplayName = "Limited"),
+	ChatRoomEnterResponseClanDisabled = 8 UMETA(DisplayName = "Clan Disabled"),
+	ChatRoomEnterResponseCommunityBan = 9 UMETA(DisplayName = "Community Ban"),
+	ChatRoomEnterResponseMemberBlockedYou = 10 UMETA(DisplayName = "Member Blocked You"),
+	ChatRoomEnterResponseYouBlockedMember = 11 UMETA(DisplayName = "You Blocked Member"),
+	ChatRoomEnterResponseRatelimitExceeded = 15 UMETA(DisplayName = "Ratelimit Exceeded"),
+};
+
 
 UCLASS()
 class MULTIPLAYERSESSIONS_API USteamShared : public UObject

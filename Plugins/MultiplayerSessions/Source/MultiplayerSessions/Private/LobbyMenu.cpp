@@ -48,6 +48,7 @@ bool ULobbyMenu::Initialize()
 		{
 			MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
 			MultiplayerSessionsSubsystem->OnRequestLobbyListComplete.AddDynamic(this, &ThisClass::OnRequestLobbyList);
+			MultiplayerSessionsSubsystem->OnJoinLobbyComplete.AddDynamic(this, &ThisClass::OnJoinLobby);
 			//MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
 		}
 	}
@@ -94,6 +95,28 @@ void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
 
 	// After looping through all the results, re-enable the Search button
 	SearchButton->SetIsEnabled(true);
+}
+
+void ULobbyMenu::OnJoinLobby(bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Emerald,
+			FString(TEXT("Successfully joined the Steam lobby!"))
+		);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Red,
+			FString(TEXT("Failed to join the Steam lobby!"))
+		);
+	}
 }
 
 void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
@@ -213,26 +236,36 @@ void ULobbyMenu::JoinButtonClicked()
 		return;
 	}
 
-	auto Session = SelectedSession->GetSessionSearchResult();
-	if (Session.IsValid() && MultiplayerSessionsSubsystem != nullptr)
-	{
-		MultiplayerSessionsSubsystem->JoinSession(Session);
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Magenta,
-			FString::Format(TEXT("Joining {0}'s lobby..."), { Session.Session.OwningUserName })
-		);
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Red,
-			FString(TEXT("Either the session was invalid or the multiplayer subsystem was invalid."))
-		);
-	}
+	auto LobbyEntry = SelectedSession->GetLobbyEntry();
+	auto LobbyId = LobbyEntry.LobbyID;
+	MultiplayerSessionsSubsystem->JoinLobby(LobbyId);
+
+
+	//if (!SelectedSession)
+	//{
+	//	return;
+	//}
+
+	//auto Session = SelectedSession->GetSessionSearchResult();
+	//if (Session.IsValid() && MultiplayerSessionsSubsystem != nullptr)
+	//{
+	//	MultiplayerSessionsSubsystem->JoinSession(Session);
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1,
+	//		15.f,
+	//		FColor::Magenta,
+	//		FString::Format(TEXT("Joining {0}'s lobby..."), { Session.Session.OwningUserName })
+	//	);
+	//}
+	//else
+	//{
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1,
+	//		15.f,
+	//		FColor::Red,
+	//		FString(TEXT("Either the session was invalid or the multiplayer subsystem was invalid."))
+	//	);
+	//}
 }
 
 void ULobbyMenu::SearchButtonClicked()

@@ -24,7 +24,7 @@ public:
 
 	/* Public Getters/Setters */
 	class UButton* GetSessionEntryButton();
-	FSteamId GetLobbyId() const { return LobbyId; }
+	FSteamId GetLobbyId() const { return LobbyEntry.LobbyID; }
 
 	/* Delegates */
 	FOnSessionSelected OnSessionSelectedDelegate;
@@ -46,6 +46,7 @@ public:
 	/* SessionSearchResult Getter and Setter */
 	void SetSessionSearchResult(const FOnlineSessionSearchResult& SearchResult) { SessionSearchResult = SearchResult; }
 	void SetLobbyEntry(const FLobbyEntry& LobbyToSet) { LobbyEntry = LobbyToSet; }
+	FLobbyEntry GetLobbyEntry() { return LobbyEntry; }
 	const FOnlineSessionSearchResult& GetSessionSearchResult() const { return SessionSearchResult; }
 
 private:
@@ -68,5 +69,4 @@ private:
 	/* Networking Variables */
 	FOnlineSessionSearchResult SessionSearchResult;
 	FLobbyEntry LobbyEntry;
-	FSteamId LobbyId;
 };

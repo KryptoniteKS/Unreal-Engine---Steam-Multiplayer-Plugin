@@ -24,6 +24,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnDestroySessionComplete
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnStartSessionComplete, bool, bWasSuccessful);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestLobbyListComplete, const TArray<FLobbyEntry>&, LobbyData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateLobbyComplete, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJoinLobbyComplete, bool, bWasSuccessful);
+
 
 
 UCLASS()
@@ -35,7 +37,6 @@ public:
 
 	/* To handle Session functionality. The Menu class will call these */
 	void CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
-	void CreateLobby(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
 	void FindSessions(int32 MaxSearchResults);
 	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
 	void DestroySession();
@@ -53,9 +54,14 @@ public:
 	UFUNCTION()
 	void OnRequestLobbyList(int32 LobbiesMatching);
 	UFUNCTION()
+	void CreateLobby(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
+	UFUNCTION()
 	void OnCreateLobby(TEnumAsByte<ESteamResult> Result, FSteamId LobbyID);
+	void JoinLobby(FSteamId LobbyID);
+	UFUNCTION()
+	void OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse);
 
-	/* Our own custom delegates for the Menu classes to bind callbacks to */
+		/* Our own custom delegates for the Menu classes to bind callbacks to */
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
 	FMultiplayerOnFindSessionsComplete MultiplayerOnFindSessionsComplete;
 	FMultiplayerOnJoinSessionComplete MultiplayerOnJoinSessionComplete;
@@ -63,6 +69,7 @@ public:
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
 	FOnRequestLobbyListComplete OnRequestLobbyListComplete;
 	FOnCreateLobbyComplete OnCreateLobbyComplete;
+	FOnJoinLobbyComplete OnJoinLobbyComplete; // TODO: Bind from LobbyMenu
 
 protected:
 	/* Internal callbacks for the delegates we will add to the Online Session Interface delegate list. These don't need to be called outside this class. */
@@ -101,6 +108,8 @@ private:
 	FString LastMapName;
 	FString LastLobbyName;
 
+	FSteamId LastLobbyJoined; // Keep track of the Steam ID for the last lobby we joined (generally also the current lobby).
+
 	FString Key_MapName = TEXT("MapName");
 	FString Key_LobbyName = TEXT("LobbyName");
 	FString Key_GameMode = TEXT("GameMode");
@@ -110,9 +119,12 @@ private:
 	class USteamRequestLobbyListAsync* SteamRequestLobbyListAsync;
 	UPROPERTY()
 	class USteamCreateLobbyAsync* SteamCreateLobbyAsync;
+	UPROPERTY()
+	class USteamJoinLobbyAsync* SteamJoinLobbyAsync;
 
 	UPROPERTY()
 	FSteamId CurrentLobbyId; // Only supports one single lobby right now. Steam supports one player owning multiple lobbies, so may need to implement later
 	UPROPERTY()
 	FLobbyMetadata LobbyMetadata; // Lobby metadata to be set on the lobby currently being created
+
 };

@@ -7,6 +7,7 @@
 #include "Online/OnlineSessionNames.h"
 #include "SteamRequestLobbyListAsync.h"
 #include "SteamCreateLobbyAsync.h"
+#include "SteamJoinLobbyAsync.h"
 #include "SteamMatchmaking.h"
 
 UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
@@ -41,6 +42,16 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("SteamCreateLobbyAsync was null!"));
+	}
+	SteamJoinLobbyAsync = NewObject<USteamJoinLobbyAsync>();
+	if (SteamJoinLobbyAsync != nullptr)
+	{
+		SteamJoinLobbyAsync->OnSuccess.AddDynamic(this, &ThisClass::OnJoinLobby);
+		SteamJoinLobbyAsync->OnFailure.AddDynamic(this, &ThisClass::OnJoinLobby);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("SteamJoinLobbyAsync was null!"));
 	}
 
 	SteamAPI_Init();
@@ -289,6 +300,8 @@ void UMultiplayerSessionsSubsystem::OnCreateLobby(TEnumAsByte<ESteamResult> Resu
 	}
 }
 
+
+
 void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	if (SessionInterface)
@@ -299,6 +312,28 @@ void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, b
 
 	// Broadcast our custom delegate to our menu class callback function
 	MultiplayerOnCreateSessionComplete.Broadcast(bWasSuccessful);
+}
+
+void UMultiplayerSessionsSubsystem::JoinLobby(FSteamId LobbyID)
+{
+	SteamJoinLobbyAsync->JoinLobby(LobbyID);
+	// Should eventually trigger our OnJoinLobby callback with the Steam API response
+}
+
+void UMultiplayerSessionsSubsystem::OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse)
+{
+	// If we have successfully entered the lobby, or "Chat room", broadcast that back to the LobbyMenu
+	if (ChatRoomEnterResponse == ESteamChatRoomEnterResponse::ChatRoomEnterResponseSuccess)
+	{
+		LastLobbyJoined = LobbyId;
+		OnJoinLobbyComplete.Broadcast(true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Steam API SteamChatRoomEnterResponse does not indicate success."));
+		OnJoinLobbyComplete.Broadcast(false);
+	}
+	
 }
 
 void UMultiplayerSessionsSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
