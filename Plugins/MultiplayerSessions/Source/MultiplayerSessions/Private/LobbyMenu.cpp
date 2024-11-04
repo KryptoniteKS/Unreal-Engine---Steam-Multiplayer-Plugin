@@ -99,16 +99,7 @@ void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
 
 void ULobbyMenu::OnJoinLobby(bool bWasSuccessful)
 {
-	if (bWasSuccessful)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Emerald,
-			FString(TEXT("Successfully joined the Steam lobby!"))
-		);
-	}
-	else
+	if (!bWasSuccessful)
 	{
 		GEngine->AddOnScreenDebugMessage(
 			-1,
@@ -116,7 +107,19 @@ void ULobbyMenu::OnJoinLobby(bool bWasSuccessful)
 			FColor::Red,
 			FString(TEXT("Failed to join the Steam lobby!"))
 		);
+
+		return;
 	}
+
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		15.f,
+		FColor::Emerald,
+		FString(TEXT("Successfully joined the Steam lobby! Attempting to join affiliated listen server..."))
+	);
+
+	MultiplayerSessionsSubsystem->JoinCurrentLobbyListenServer();
+
 }
 
 void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)

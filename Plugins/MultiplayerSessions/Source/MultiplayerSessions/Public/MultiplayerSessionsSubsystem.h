@@ -57,7 +57,12 @@ public:
 	void CreateLobby(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
 	UFUNCTION()
 	void OnCreateLobby(TEnumAsByte<ESteamResult> Result, FSteamId LobbyID);
+	UFUNCTION()
 	void JoinLobby(FSteamId LobbyID);
+	UFUNCTION()
+	void JoinListenServer(FSteamId SessionID); // On a listen server, the SessionID is the SteamID of the host player
+	UFUNCTION()
+	void JoinCurrentLobbyListenServer(); // Joins the listen server connected to the last lobby joined.
 	UFUNCTION()
 	void OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse);
 

@@ -9,6 +9,7 @@
 #include "SteamCreateLobbyAsync.h"
 #include "SteamJoinLobbyAsync.h"
 #include "SteamMatchmaking.h"
+#include "Kismet/GameplayStatics.h"
 
 UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete)),
@@ -318,6 +319,38 @@ void UMultiplayerSessionsSubsystem::JoinLobby(FSteamId LobbyID)
 {
 	SteamJoinLobbyAsync->JoinLobby(LobbyID);
 	// Should eventually trigger our OnJoinLobby callback with the Steam API response
+}
+
+void UMultiplayerSessionsSubsystem::JoinListenServer(FSteamId SessionID)
+{
+	if (SessionID.Result == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid Steam Session ID!"));
+		return;
+	}
+
+	FString LevelName = FString::Printf(TEXT("steam.%llu"), SessionID.Result);
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UGameplayStatics::OpenLevel(World, *LevelName);
+	}
+	
+}
+
+void UMultiplayerSessionsSubsystem::JoinCurrentLobbyListenServer()
+{
+	FSteamId CurrentLobbyOwner = USteamMatchmaking::GetLobbyOwner(LastLobbyJoined);
+
+	if (CurrentLobbyOwner.Result != 0)
+	{
+		JoinListenServer(CurrentLobbyOwner);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid Lobby Owner. Either the lobby owner data was invalid, or the current player is not in a Steam lobby."))
+	}
+	
 }
 
 void UMultiplayerSessionsSubsystem::OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse)
