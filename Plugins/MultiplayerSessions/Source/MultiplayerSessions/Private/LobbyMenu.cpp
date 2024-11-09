@@ -81,6 +81,8 @@ void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
 		FColor::Red,
 		FString(TEXT("Lobby Data Received! Creating widget..."))
 	);
+	UE_LOG(LogTemp, Error, TEXT("Lobby Data has been received by our Lobby Menu. Creating widgets for %d entries..."), LobbyData.Num());
+
 
 	for (auto LobbyEntry : LobbyData)
 	{
@@ -90,6 +92,8 @@ void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
 		NewSession->GetSessionEntryButton()->SetStyle(NormalButtonStyle);
 
 		NewSession->OnSessionSelectedDelegate.AddDynamic(this, &ThisClass::OnSessionEntrySelected);
+
+		UE_LOG(LogTemp, Error, TEXT("Adding entry to the menu with Host Name %s, Map Name %s, and Game Mode %s."), *LobbyEntry.HostName, *LobbyEntry.MapName, *LobbyEntry.MapName);
 		AddSession(NewSession);
 	}
 
@@ -278,21 +282,19 @@ void ULobbyMenu::SearchButtonClicked()
 	if (MultiplayerSessionsSubsystem)
 	{
 		// Add our filters, if they exist
-		auto SelectedMap = Combo_Maps->GetSelectedOption();
+		auto SelectedMap = Combo_Maps->GetSelectedOption(); // formatted map name
 		auto SelectedGameMode = Combo_GameModes->GetSelectedOption();
 		auto AllOption = MenuHelper::GetAllOption();
 		// If we are not filtering by ALL maps, filter by the specific map
 		if (!SelectedMap.Equals(AllOption))
 		{
 			auto MapNameKey = MultiplayerSessionsSubsystem->GetMapNameKey();
-			UE_LOG(LogTemp, Warning, TEXT("Filtering for MapNameKey: %s, Value: %s"), *MapNameKey, *SelectedMap);
 			USteamMatchmaking::AddRequestLobbyListStringFilter(MapNameKey, SelectedMap, ESteamLobbyComparison::LobbyComparisonEqualTo);
 		}
 		// If we are not filtering by ALL game modes, filter by the specific game mode
 		if (!SelectedGameMode.Equals(AllOption))
 		{
 			auto GameModeKey = MultiplayerSessionsSubsystem->GetGameModeKey();
-			UE_LOG(LogTemp, Warning, TEXT("Filtering for GameModeKey: %s, Value: %s"), *GameModeKey, *SelectedGameMode);
 			USteamMatchmaking::AddRequestLobbyListStringFilter(GameModeKey, SelectedGameMode, ESteamLobbyComparison::LobbyComparisonEqualTo);
 		}
 		// This will eventually trigger our callback on this class: OnFindSessions()

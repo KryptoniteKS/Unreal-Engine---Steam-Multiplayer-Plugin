@@ -70,12 +70,11 @@ void UMultiplayerSessionsSubsystem::CreateLobby(FString MapName, FString LobbyNa
 	LobbyMetadata.Reset();
 
 	LobbyMetadata.GameMode = GameMode;
-	LobbyMetadata.MapName = MapName;
+	LobbyMetadata.MapName = MapName; // Formatted map name
 	LobbyMetadata.LobbyName = LobbyName;
 	LobbyMetadata.MaxNumPlayers = MaxNumPlayers;
 	LobbyMetadata.HostName = ANSI_TO_TCHAR(SteamFriends()->GetPersonaName()); // TODO: Create my own interface
 
-	// Do I need to call this on the GameThread??
 	SteamCreateLobbyAsync->CreateLobby(MaxNumPlayers, ESteamLobbyType::LobbyTypePublic);
 }
 
@@ -219,27 +218,16 @@ void UMultiplayerSessionsSubsystem::RequestLobbyList()
 
 void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 {
-	if (LobbiesMatching < 0)
+	if (LobbiesMatching <= 0)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Red,
-			FString(TEXT("Request Lobby List failed!"))
-		);
-
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		15.f,
-		FColor::Red,
-		FString(TEXT("Looping through lobbies..."))
-	);
+	UE_LOG(LogTemp, Error, TEXT("At least one lobby was found. Looping through them..."));
+
 	// Loop through the sessions by using GetLobbyByIndex
 	TArray<FLobbyEntry> LobbyData;
-	for (int curLobby = 0; curLobby < LobbiesMatching - 1; curLobby++)
+	for (int curLobby = 0; curLobby < LobbiesMatching; curLobby++)
 	{
 		auto LobbyId = USteamMatchmaking::GetLobbyByIndex(curLobby);
 
@@ -254,26 +242,17 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 		LobbyEntry.MapName = USteamMatchmaking::GetLobbyData(LobbyId, Key_MapName);
 
 		// After we have created our structs, add them to a list to be broadcast at the end of the loop. LobbyMenu will subscribe to this
+		UE_LOG(LogTemp, Error, TEXT("Adding Lobby with index %d and Lobby ID %lu to our menu."), curLobby, LobbyId.Result);
 		LobbyData.Add(LobbyEntry);
 	}
 
 	
 	if (LobbyData.Num() > 0)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Red,
-			FString(TEXT("At least 1 lobby found."))
-		);
+		UE_LOG(LogTemp, Error, TEXT("There should be %d lobbies visible on our menu..."), LobbyData.Num());
 	}
 
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		15.f,
-		FColor::Red,
-		FString(TEXT("Broadcasting Lobby Data..."))
-	);
+	UE_LOG(LogTemp, Error, TEXT("Broadcasting the list of lobbies to our Lobby Menu."));
 	OnRequestLobbyListComplete.Broadcast(LobbyData);
 	
 }
@@ -288,9 +267,13 @@ void UMultiplayerSessionsSubsystem::OnCreateLobby(TEnumAsByte<ESteamResult> Resu
 		UE_LOG(LogTemp, Warning, TEXT("Result from CreateLobby was good. Setting Lobby Metadata now..."));
 
 		// Set metadata
+		UE_LOG(LogTemp, Warning, TEXT("Setting Lobby Metadata - Key: %s - Value: %s"), *Key_GameMode, *LobbyMetadata.GameMode);
 		USteamMatchmaking::SetLobbyData(LobbyID, Key_GameMode, LobbyMetadata.GameMode);
+		UE_LOG(LogTemp, Warning, TEXT("Setting Lobby Metadata - Key: %s - Value: %s"), *Key_LobbyName, *LobbyMetadata.LobbyName);
 		USteamMatchmaking::SetLobbyData(LobbyID, Key_LobbyName, LobbyMetadata.LobbyName);
-		USteamMatchmaking::SetLobbyData(LobbyID, Key_MapName, LobbyMetadata.MapName);
+		UE_LOG(LogTemp, Warning, TEXT("Setting Lobby Metadata - Key: %s - Value: %s"), *Key_MapName, *LobbyMetadata.MapName);
+		USteamMatchmaking::SetLobbyData(LobbyID, Key_MapName, LobbyMetadata.MapName); // Literal map name, unformatted
+		UE_LOG(LogTemp, Warning, TEXT("Setting Lobby Metadata - Key: %s - Value: %s"), *Key_HostName, *LobbyMetadata.HostName);
 		USteamMatchmaking::SetLobbyData(LobbyID, Key_HostName, LobbyMetadata.HostName);
 
 		OnCreateLobbyComplete.Broadcast(true);
