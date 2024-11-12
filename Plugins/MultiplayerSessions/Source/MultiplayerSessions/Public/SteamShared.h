@@ -6,6 +6,7 @@
 #include "UObject/NoExportTypes.h"
 
 #include <steam/isteammatchmaking.h>
+#include <steam/isteamfriends.h>
 
 #include "SteamShared.generated.h"
 
@@ -73,6 +74,7 @@ struct FSteamId
 	}
 };
 
+/* Custom struct to represent the metadata we set on our Steam lobbies within the Host Menu */
 USTRUCT(BlueprintType)
 struct FLobbyMetadata
 {
@@ -99,6 +101,7 @@ struct FLobbyMetadata
 	}
 };
 
+/* Custom struct to represent an entry on our Lobby Menu */
 USTRUCT(BlueprintType)
 struct FLobbyEntry
 {
@@ -306,6 +309,7 @@ enum ESteamResult
 	ResultNoVerifiedPhone = 123,				// account does not have a verified phone number
 };
 
+/* https://partner.steamgames.com/doc/api/steam_api#EChatRoomEnterResponse */
 UENUM(BlueprintType)
 enum ESteamChatRoomEnterResponse
 {
@@ -323,6 +327,190 @@ enum ESteamChatRoomEnterResponse
 	ChatRoomEnterResponseYouBlockedMember = 11 UMETA(DisplayName = "You Blocked Member"),
 	ChatRoomEnterResponseRatelimitExceeded = 15 UMETA(DisplayName = "Ratelimit Exceeded"),
 };
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#EFriendFlags */
+UENUM(BlueprintType)
+enum ESteamFriendFlags
+{
+	FriendFlagNone = 0x00 UMETA(DisplayName = "None"),
+	FriendFlagBlocked = 0x01 UMETA(DisplayName = "Blocked"),
+	FriendFlagFriendshipRequested = 0x02 UMETA(DisplayName = "Friendship Requested"),
+	FriendFlagImmediate = 0x04 UMETA(DisplayName = "Immediate"),
+	FriendFlagClanMember = 0x08 UMETA(DisplayName = "Clan Member"),
+	FriendFlagOnGameServer = 0x10 UMETA(DisplayName = "On Game Server"),
+	FriendFlagRequestingFriendship = 0x80 UMETA(DisplayName = "Requesting Friendship"),
+	FriendFlagRequestingInfo = 0x100 UMETA(DisplayName = "Requesting Info"),
+	FriendFlagIgnored = 0x200 UMETA(DisplayName = "Ignored"),
+	FriendFlagIgnoredFriend = 0x400 UMETA(DisplayName = "Ignored Friend"),
+	FriendFlagSuggested = 0x800 UMETA(DisplayName = "Suggested"),
+	FriendFlagChatMember = 0x1000 UMETA(DisplayName = "Chat Member"),
+	FriendFlagFlagAll = 0xFFFF UMETA(DisplayName = "Flag All"),
+};
+
+/* https://partner.steamgames.com/doc/api/steam_api#CGameID */
+USTRUCT(BlueprintType)
+struct FSteamGameID
+{
+	GENERATED_BODY()
+
+	int64 Result = 0;
+
+	FSteamGameID()
+	{
+		Result = 0;
+	}
+
+	FSteamGameID(CGameID GameID)
+	{
+		Result = *GameID.GetUint64Ptr();
+	}
+
+	CGameID GetGameID() const
+	{
+		CGameID LocalId;
+		LocalId.Set(Result);
+		return LocalId;
+	}
+};
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#FriendGameInfo_t */
+USTRUCT(BlueprintType)
+struct FSteamFriendGameInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Steam Friends")
+	FSteamId LobbySteamId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Steam Friends")
+	FSteamGameID GameId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Steam Friends")
+	int32 IP;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Steam Friends")
+	int32 GamePort;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Steam Friends")
+	int32 QueryPort;
+
+	FSteamFriendGameInfo()
+	{
+		LobbySteamId = 0;
+		GameId = FSteamGameID();
+		IP = 0;
+		GamePort = 0;
+		QueryPort = 0;
+	};
+	FSteamFriendGameInfo(FriendGameInfo_t FriendGameInfo)
+	{
+		LobbySteamId = FriendGameInfo.m_steamIDLobby;
+		GameId = FriendGameInfo.m_gameID;
+		IP = FriendGameInfo.m_unGameIP;
+		GamePort = FriendGameInfo.m_usGamePort;
+		QueryPort = FriendGameInfo.m_usQueryPort;
+	};
+
+};
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#EPersonaState */
+UENUM(BlueprintType)
+enum ESteamPersonaState
+{
+	PersonaStateOffline = 0 UMETA(DisplayName = "Offline"),
+	PersonaStateOnline = 1 UMETA(DisplayName = "Online"),
+	PersonaStateBusy = 2 UMETA(DisplayName = "Busy"),
+	PersonaStateAway = 3 UMETA(DisplayName = "Away"),
+	PersonaStateSnooze = 4 UMETA(DisplayName = "Snooze"),
+	PersonaStateLookingToTrade = 5 UMETA(DisplayName = "Looking To Trade"),
+	PersonaStateLookingToPlay = 6 UMETA(DisplayName = "Looking To Play"),
+	PersonaStateMax = 7 UMETA(DisplayName = "Max")
+};
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#EFriendRelationship */
+UENUM(BlueprintType)
+enum ESteamFriendRelationship
+{
+	FriendRelationshipNone = 0 UMETA(DisplayName = "None"),
+	FriendRelationshipBlocked = 1 UMETA(DisplayName = "Blocked"),
+	FriendRelationshipRequestRecipient = 2 UMETA(DisplayName = "Request Recipient"),
+	FriendRelationshipFriend = 3 UMETA(DisplayName = "Friend"),
+	FriendRelationshipRequestInitiator = 4 UMETA(DisplayName = "Request Initiator"),
+	FriendRelationshipIgnored = 5 UMETA(DisplayName = "Ignored"),
+	FriendRelationshipIgnoredFriend = 6 UMETA(DisplayName = "Ignored Friend"),
+	FriendRelationshipSuggested = 7 UMETA(DisplayName = "Suggested"), // DEPRECATED
+	FriendRelationshipMax = 8 UMETA(DisplayName = "Max") // Used for looping through the enum
+};
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#FriendsGroupID_t */
+USTRUCT(BlueprintType)
+struct FSteamFriendsGroupID
+{
+	GENERATED_BODY()
+
+	int32 Value = 0;
+
+	FSteamFriendsGroupID()
+	{
+		Value = 0;
+	}
+
+	FSteamFriendsGroupID(FriendsGroupID_t FriendsGroupID)
+	{
+		Value = FriendsGroupID;
+	}
+
+	FriendsGroupID_t GetFriendsGroupID() const
+	{
+		return Value;
+	}
+
+};
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#EUserRestriction */
+UENUM(BlueprintType)
+enum ESteamUserRestriction
+{
+	UserRestrictionNone = 0 UMETA(DisplayName = "None"),
+	UserRestrictionUnknown = 1 UMETA(DisplayName = "Unknown"), // User is offline
+	UserRestrictionAnyChat = 2 UMETA(DisplayName = "Any Chat"), // User cannot send/receive any chat
+	UserRestrictionVoiceChat = 4 UMETA(DisplayName = "Voice Chat"), // User cannot send/receive voice chat
+	UserRestrictionGroupChat = 8 UMETA(DisplayName = "Group Chat"), // User cannot send/receive group chat
+	UserRestrictionRating = 16 UMETA(DisplayName = "Age Rating"), // User is too young according to rating in current region
+	UserRestrictionGameInvites = 32 UMETA(DisplayName = "Game Invites"), // User cannot send/receive game invites (for instance, if they are on mobile)
+	UserRestrictionTrading = 64 UMETA(DisplayName = "Trading") // User cannot participate in trading (for instance, if they are on console or mobile)
+};
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#ECommunityProfileItemType */
+UENUM(BlueprintType)
+enum ESteamCommunityProfileItemType
+{
+	ESIK_ECommunityProfileItemType_AnimatedAvatar = 0 UMETA(DisplayName = "Animated avatar image (GIF)"),
+	ESIK_ECommunityProfileItemType_AvatarFrame = 1 UMETA(DisplayName = "Avatar frame (may or may not be an animated PNG)"),
+	ESIK_ECommunityProfileItemType_ProfileModifier = 2 UMETA(DisplayName = "Special profile modifier item, like Seasonal Profile or Artist Profile"),
+	ESIK_ECommunityProfileItemType_ProfileBackground = 3 UMETA(DisplayName = "Profile background image or movie"),
+	ESIK_ECommunityProfileItemType_MiniProfileBackground = 4 UMETA(DisplayName = "Background image or movie for the hover flyout for a user"),
+};
+
+/* https://partner.steamgames.com/doc/api/ISteamFriends#ECommunityProfileItemProperty */
+UENUM(BlueprintType)
+enum ESteamCommunityProfileItemProperty
+{
+	ESIK_ECommunityProfileItemProperty_ImageSmall = 0 UMETA(DisplayName = "URL to the small or animated version of the image"),
+	ESIK_ECommunityProfileItemProperty_ImageLarge = 1 UMETA(DisplayName = "URL to the large or static version of the image"),
+	ESIK_ECommunityProfileItemProperty_InternalName = 2 UMETA(DisplayName = "Internal name entered on the partner site (for debugging)"),
+	ESIK_ECommunityProfileItemProperty_Title = 3 UMETA(DisplayName = "Localized name of the item"),
+	ESIK_ECommunityProfileItemProperty_Description = 4 UMETA(DisplayName = "Localized description of the item"),
+	ESIK_ECommunityProfileItemProperty_AppID = 5 UMETA(DisplayName = "AppID of the item (unsigned integer)"),
+	ESIK_ECommunityProfileItemProperty_TypeID = 6 UMETA(DisplayName = "Type id of the item, unique to the appid (unsigned integer)"),
+	ESIK_ECommunityProfileItemProperty_Class = 7 UMETA(DisplayName = "Class or type of item (internal value, unsigned integer)"),
+	ESIK_ECommunityProfileItemProperty_MovieWebM = 8 UMETA(DisplayName = "URL to the webm video file"),
+	ESIK_ECommunityProfileItemProperty_MovieMP4 = 9 UMETA(DisplayName = "URL to the mp4 video file"),
+	ESIK_ECommunityProfileItemProperty_MovieWebMSmall = 10 UMETA(DisplayName = "URL to the small webm video file"),
+	ESIK_ECommunityProfileItemProperty_MovieMP4Small = 11 UMETA(DisplayName = "URL to the small mp4 video file"),
+};
+
+
 
 
 UCLASS()
