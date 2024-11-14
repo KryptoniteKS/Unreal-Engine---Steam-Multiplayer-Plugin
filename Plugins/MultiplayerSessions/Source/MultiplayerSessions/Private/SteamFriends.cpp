@@ -5,51 +5,112 @@
 
 void USteamFriends::ActivateGameOverlay(const FString& DialogToOpen)
 {
+	if (SteamFriends())
+	{
+		SteamFriends()->ActivateGameOverlay(TCHAR_TO_ANSI(*DialogToOpen));
+	}
 }
 
+// TODO: Let's use FSteamId as input parameter instead
 void USteamFriends::ActivateGameOverlayInviteDialog(const int64& SteamIdLobby)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId.SetFromUint64(SteamIdLobby);
+		SteamFriends()->ActivateGameOverlayInviteDialog(SteamId);
+	}
 }
 
 void USteamFriends::ActivateGameOverlayToStore(const FSteamAppId& AppID, bool bAddToCartAndShow)
 {
+	if (SteamFriends())
+	{
+		SteamFriends()->ActivateGameOverlayToStore(AppID.GetAppID(), bAddToCartAndShow ? k_EOverlayToStoreFlag_AddToCartAndShow : k_EOverlayToStoreFlag_None);
+	}
 }
 
 void USteamFriends::ActivateGameOverlayToUser(const FString& Dialog, int64 SteamIdUser)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId.SetFromUint64(SteamIdUser);
+		SteamFriends()->ActivateGameOverlayToUser(TCHAR_TO_ANSI(*Dialog), SteamId);
+	}
 }
 
 void USteamFriends::ActivateGameOverlayToWebPage(const FString& URL, bool bUseModal)
 {
+	if (SteamFriends())
+	{
+		SteamFriends()->ActivateGameOverlayToWebPage(TCHAR_TO_ANSI(*URL), bUseModal ? k_EActivateGameOverlayToWebPageMode_Modal : k_EActivateGameOverlayToWebPageMode_Default);
+	}
 }
 
 void USteamFriends::ClearRichPresence()
 {
+	if (SteamFriends())
+	{
+		SteamFriends()->ClearRichPresence();
+	}
 }
 
 bool USteamFriends::CloseClanChatWindowInSteam(int64 SteamIdClanChat)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId.SetFromUint64(SteamIdClanChat);
+		return SteamFriends()->CloseClanChatWindowInSteam(SteamId);
+	}
+
 	return false;
 }
 
 FSteamId USteamFriends::GetChatMemberByIndex(FSteamId SteamIdClan, int32 MemberIndex)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId = SteamIdClan.GetSteamID();
+		return SteamFriends()->GetChatMemberByIndex(SteamId, MemberIndex);
+	}
+
 	return FSteamId();
 }
 
 bool USteamFriends::GetClanActivityCounts(FSteamId SteamIdClan, int32& Online, int32& InGame, int32& Chatting)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		return SteamFriends()->GetClanActivityCounts(SteamId, &Online, &InGame, &Chatting); // Pass by reference
+	}
+
 	return false;
 }
 
 FSteamId USteamFriends::GetClanByIndex(int32 ClanIndex)
 {
+	if (SteamFriends())
+	{
+		return SteamFriends()->GetClanByIndex(ClanIndex);
+	}
+
 	return FSteamId();
 }
 
 int32 USteamFriends::GetClanChatMemberCount(FSteamId SteamIdClan)
 {
-	return int32();
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		return SteamFriends()->GetClanChatMemberCount(SteamId);
+	}
+
+	return -1;
 }
 
 int32 USteamFriends::GetClanChatMessage(FSteamId SteamIdClan, int32 MessageIndex, const TArray<uint8>& Text, FSteamId& SteamIdUser, FString& ChatEntryType)

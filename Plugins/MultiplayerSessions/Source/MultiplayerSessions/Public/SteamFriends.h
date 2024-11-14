@@ -561,7 +561,7 @@ public:
 	static bool SetRichPresence(const FString& Key, const FString& Value);
 
 	//After calling RequestEquippedProfileItems, you can use this function to check if the user has a type of profile item equipped or not
-	UFUNCTION(BlueprintCallable, DisplayName = "B Has Equipped Profile Item", meta = (Keywords = "BHasEquippedProfileItem"), Category = "Steam Friends")
+	UFUNCTION(BlueprintCallable, DisplayName = "Has Equipped Profile Item", meta = (Keywords = "BHasEquippedProfileItem"), Category = "Steam Friends")
 	static bool BHasEquippedProfileItem(FSteamId SteamIdUser, TEnumAsByte<ESteamCommunityProfileItemType> ItemType);
 
 	//Returns a string property for a user's equipped profile item
