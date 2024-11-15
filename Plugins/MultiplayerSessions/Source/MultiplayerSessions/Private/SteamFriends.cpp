@@ -115,47 +115,107 @@ int32 USteamFriends::GetClanChatMemberCount(FSteamId SteamIdClan)
 
 int32 USteamFriends::GetClanChatMessage(FSteamId SteamIdClan, int32 MessageIndex, const TArray<uint8>& Text, FSteamId& SteamIdUser, FString& ChatEntryType)
 {
-	return int32();
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		CSteamID SteamIdUserOut;
+		EChatEntryType ChatEntryType;
+		int32 Result = SteamFriends()->GetClanChatMessage(SteamId, MessageIndex, (char*)Text.GetData(), Text.Num(), &ChatEntryType, &SteamIdUserOut);
+		return Result;
+	}
+
+	return -1;
 }
 
 int32 USteamFriends::GetClanCount()
 {
-	return int32();
+	if (SteamFriends())
+	{
+		SteamFriends()->GetClanCount();
+	}
+
+	return -1;
 }
 
 FString USteamFriends::GetClanName(FSteamId SteamIdClan)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		return UTF8_TO_TCHAR(SteamFriends()->GetClanName(SteamId));
+	}
+
 	return FString();
 }
 
 FSteamId USteamFriends::GetClanOfficerByIndex(FSteamId SteamIdClan, int32 OfficerIndex)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		return SteamFriends()->GetClanOfficerByIndex(SteamId, OfficerIndex);
+	}
+
 	return FSteamId();
 }
 
 int32 USteamFriends::GetClanOfficerCount(FSteamId SteamIdClan)
 {
-	return int32();
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		return SteamFriends()->GetClanOfficerCount(SteamId);
+	}
+
+	return -1;
 }
 
 FSteamId USteamFriends::GetClanOwner(FSteamId SteamIdClan)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		return SteamFriends()->GetClanOwner(SteamId);
+	}
+
 	return FSteamId();
 }
 
 FString USteamFriends::GetClanTag(FSteamId SteamIdClan)
 {
+	if (SteamFriends())
+	{
+		CSteamID SteamId;
+		SteamId = SteamIdClan.GetSteamID();
+		return UTF8_TO_TCHAR(SteamFriends()->GetClanTag(SteamId));
+	}
+
 	return FString();
 }
 
 FSteamId USteamFriends::GetCoplayFriend(int32 CoplayFriend)
 {
+	if (SteamFriends())
+	{
+		return SteamFriends()->GetCoplayFriend(CoplayFriend);
+	}
+
 	return FSteamId();
 }
 
 int32 USteamFriends::GetCoplayFriendCount()
 {
-	return int32();
+	if (SteamFriends())
+	{
+		return SteamFriends()->GetCoplayFriendCount();
+	}
+
+	return -1;
 }
 
 FSteamId USteamFriends::GetFriendByIndex(int32 FriendIndex, TArray<TEnumAsByte<ESteamFriendFlags>> FriendFlags)
