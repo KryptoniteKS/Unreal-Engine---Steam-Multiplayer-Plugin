@@ -66,7 +66,7 @@ public:
 	UFUNCTION()
 	void OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse);
 
-		/* Our own custom delegates for the Menu classes to bind callbacks to */
+	/* Our own custom delegates for the Menu classes to bind callbacks to */
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
 	FMultiplayerOnFindSessionsComplete MultiplayerOnFindSessionsComplete;
 	FMultiplayerOnJoinSessionComplete MultiplayerOnJoinSessionComplete;
