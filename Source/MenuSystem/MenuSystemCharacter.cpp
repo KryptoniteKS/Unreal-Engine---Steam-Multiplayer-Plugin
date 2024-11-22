@@ -14,6 +14,7 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
 #include "Online/OnlineSessionNames.h"
+#include "MultiplayerSessions/Public/PlayerPauseMenu.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -64,17 +65,35 @@ AMenuSystemCharacter::AMenuSystemCharacter() :
 	if (OnlineSubsystem)
 	{
 		OnlineSessionInterface = OnlineSubsystem->GetSessionInterface();
-		
-		/*
-		if (GEngine)
+	}
+
+	CreatePlayerPauseMenuWidget();
+}
+
+void AMenuSystemCharacter::CreatePlayerPauseMenuWidget()
+{
+	if (PlayerPauseMenuClass)
+	{
+		PlayerPauseMenu = CreateWidget<UPlayerPauseMenu>(GetWorld(), PlayerPauseMenuClass);
+		if (PlayerPauseMenu)
 		{
 			GEngine->AddOnScreenDebugMessage(
 				-1,
 				15.f,
-				FColor::Blue,
-				FString::Printf(TEXT("Found subsystem %s"), *OnlineSubsystem->GetSubsystemName().ToString())
+				FColor::Emerald,
+				FString(TEXT("Pause Menu created successfully!"))
 			);
-		} */
+			//PlayerPauseMenu->AddToViewport();
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Yellow,
+				FString(TEXT("Pause Menu failed to create!"))
+			);
+		}
 	}
 }
 

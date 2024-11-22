@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "MultiplayerSessions/Public/PlayerPauseMenu.h"
 
 #include "MenuSystemCharacter.generated.h"
 
@@ -48,6 +49,12 @@ class AMenuSystemCharacter : public ACharacter
 
 public:
 	AMenuSystemCharacter();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TSubclassOf<UUserWidget> PlayerPauseMenuClass;
+
+	UFUNCTION(BlueprintCallable)
+	void CreatePlayerPauseMenuWidget();
 	
 
 protected:
@@ -95,5 +102,8 @@ private:
 	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate; // this will be the delegate we add to the session interface's delegate list for completion of joining a session
 
 	TSharedPtr<FOnlineSessionSearch> SessionSearch; // Stores our SessionSearch settings and results
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	class UPlayerPauseMenu* PlayerPauseMenu;
 };
 

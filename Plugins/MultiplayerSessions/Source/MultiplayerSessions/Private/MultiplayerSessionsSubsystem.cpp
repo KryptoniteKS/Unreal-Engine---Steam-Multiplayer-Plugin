@@ -10,6 +10,7 @@
 #include "SteamJoinLobbyAsync.h"
 #include "SteamMatchmaking.h"
 #include "Kismet/GameplayStatics.h"
+#include "SteamFriends.h"
 
 UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete)),
@@ -350,6 +351,16 @@ void UMultiplayerSessionsSubsystem::OnJoinLobby(FSteamId LobbyId, bool bLocked, 
 		OnJoinLobbyComplete.Broadcast(false);
 	}
 	
+}
+
+void UMultiplayerSessionsSubsystem::ActivateInviteOverlay()
+{
+	USteamFriends::ActivateGameOverlayInviteDialog(CurrentLobbyId.Result);
+}
+
+void UMultiplayerSessionsSubsystem::LeaveCurrentLobby()
+{
+	USteamMatchmaking::LeaveLobby(CurrentLobbyId);
 }
 
 void UMultiplayerSessionsSubsystem::OnFindSessionsComplete(bool bWasSuccessful)

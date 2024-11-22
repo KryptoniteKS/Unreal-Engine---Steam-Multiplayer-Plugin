@@ -8,6 +8,18 @@ public class MenuSystem : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "OnlineSubsystemSteam", "OnlineSubsystem" });
-	}
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "OnlineSubsystemSteam", "OnlineSubsystem", "MultiplayerSessions", "UMG", "Slate", "SlateCore"});
+        PrivateDependencyModuleNames.AddRange(
+        new string[]
+        {
+                "CoreUObject",
+                "Engine",
+                "MultiplayerSessions",
+                "UMG",
+                "Slate",
+                "SlateCore",
+            // ... add private dependencies that you statically link with here ...	
+        }
+        );
+    }
 }

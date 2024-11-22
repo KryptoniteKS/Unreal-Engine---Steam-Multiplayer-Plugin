@@ -48,6 +48,8 @@ public:
 	FString GetLobbyNameKey() { return Key_LobbyName; }
 	UFUNCTION()
 	FString GetGameModeKey() { return Key_GameMode; }
+	UFUNCTION()
+	FSteamId GetCurrentLobbyId() { return CurrentLobbyId; }
 
 	UFUNCTION()
 	void RequestLobbyList();
@@ -65,6 +67,10 @@ public:
 	void JoinCurrentLobbyListenServer(); // Joins the listen server connected to the last lobby joined.
 	UFUNCTION()
 	void OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse);
+	UFUNCTION()
+	void ActivateInviteOverlay();
+	UFUNCTION()
+	void LeaveCurrentLobby();
 
 	/* Our own custom delegates for the Menu classes to bind callbacks to */
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
