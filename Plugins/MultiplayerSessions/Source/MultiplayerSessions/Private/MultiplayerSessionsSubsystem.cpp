@@ -57,6 +57,16 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	}
 
 	SteamAPI_Init();
+
+	if (SteamFriends())
+	{
+		m_CallbackGameLobbyJoinRequested.Register(this, &ThisClass::OnGameLobbyJoinRequestedCallback);
+	}
+}
+
+UMultiplayerSessionsSubsystem::~UMultiplayerSessionsSubsystem()
+{
+	m_CallbackGameLobbyJoinRequested.Unregister();
 }
 
 void UMultiplayerSessionsSubsystem::CreateLobby(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers)
@@ -332,7 +342,7 @@ void UMultiplayerSessionsSubsystem::JoinCurrentLobbyListenServer()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid Lobby Owner. Either the lobby owner data was invalid, or the current player is not in a Steam lobby."))
+		UE_LOG(LogTemp, Warning, TEXT("Invalid Lobby Owner. Either the lobby owner data was invalid, or the local player is not in a Steam lobby.\n Last Lobby Joined: %llu"), LastLobbyJoined.Result)
 	}
 	
 }
@@ -413,4 +423,11 @@ void UMultiplayerSessionsSubsystem::OnDestroySessionComplete(FName SessionName, 
 
 void UMultiplayerSessionsSubsystem::OnStartSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+}
+
+void UMultiplayerSessionsSubsystem::OnGameLobbyJoinRequestedCallback(GameLobbyJoinRequested_t* pCallback)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Received GameLobbyJoinRequested callabck from Steam. Attempting to connect to requested lobby and listen server..."));
+	JoinLobby(FSteamId(pCallback->m_steamIDLobby));
+	JoinCurrentLobbyListenServer();
 }

@@ -6,6 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "SteamShared.h"
+#include "Tickable.h"
 THIRD_PARTY_INCLUDES_START
 #include <steam/steam_api.h>
 #include <steam/isteammatchmaking.h>
@@ -26,6 +27,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestLobbyListComplete, const T
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateLobbyComplete, bool, bWasSuccessful);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJoinLobbyComplete, bool, bWasSuccessful);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameLobbyJoinRequested, FSteamId, SteamId, FSteamId, LobbyId);
+
 
 
 UCLASS()
@@ -34,6 +37,7 @@ class MULTIPLAYERSESSIONS_API UMultiplayerSessionsSubsystem : public UGameInstan
 	GENERATED_BODY()
 public:
 	UMultiplayerSessionsSubsystem();
+	~UMultiplayerSessionsSubsystem();
 
 	/* To handle Session functionality. The Menu class will call these */
 	void CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
@@ -82,6 +86,9 @@ public:
 	FOnCreateLobbyComplete OnCreateLobbyComplete;
 	FOnJoinLobbyComplete OnJoinLobbyComplete; // TODO: Bind from LobbyMenu
 
+	UPROPERTY(BlueprintAssignable, Category = "Steam Callbacks")
+	FOnGameLobbyJoinRequested OnGameLobbyJoinRequested;
+
 protected:
 	/* Internal callbacks for the delegates we will add to the Online Session Interface delegate list. These don't need to be called outside this class. */
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
@@ -112,6 +119,9 @@ private:
 
 	FOnStartSessionCompleteDelegate StartSessionCompleteDelegate;
 	FDelegateHandle StartSessionCompleteDelegateHandle;
+
+	STEAM_CALLBACK_MANUAL(UMultiplayerSessionsSubsystem, OnGameLobbyJoinRequestedCallback, GameLobbyJoinRequested_t, m_CallbackGameLobbyJoinRequested);
+
 
 	bool bCreateSessionOnDestroy{ false };
 	int32 LastMaxNumPlayers;
