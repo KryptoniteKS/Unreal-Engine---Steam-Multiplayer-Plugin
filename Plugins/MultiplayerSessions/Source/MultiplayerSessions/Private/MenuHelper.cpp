@@ -15,8 +15,7 @@ const TArray<FString> MenuHelper::GameModes = {
 };
 const FString MenuHelper::AllOption = TEXT("<All>");
 
-/* Populates a game mode combo box with all game modes defined in the MenuHelper class.
-Optionally includes an option for "<All>". */
+/* Populates a game mode combo box with all game modes defined in the MenuHelper class. Optionally includes an option for "<All>", generally used for finding lobbies/games. */
 void MenuHelper::PopulateGameModeComboBox(UComboBoxString* Combo_GameModes, bool bIncludeAllOption)
 {
 	if (bIncludeAllOption) 

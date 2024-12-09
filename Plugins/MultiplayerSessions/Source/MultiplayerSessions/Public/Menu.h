@@ -18,52 +18,31 @@ class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	/* Initialization Logic */
-	UFUNCTION(BlueprintCallable)
-	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString LobbyPath = FString(TEXT("/Game/ThirdPerson/Maps/Lobby")));
-
-	/* Public Getters/Setters */
-	UFUNCTION(BlueprintCallable)
-	class UButton* GetJoinButton();
-
-	/* Delegates */
+#pragma region Button Click Delegates
 	FOnJoinButtonClicked OnJoinButtonClickedDelegate;
 	FOnHostButtonClicked OnHostButtonClickedDelegate;
+#pragma endregion
 
 protected:
-	/* Overrides */
+#pragma region Initialization
 	virtual bool Initialize() override;
 	virtual void NativeDestruct() override;
-
-	/* Callbacks for the custom delegates on the MultiplayerSessionsSubsystem */
-	UFUNCTION()
-	void OnCreateSession(bool bWasSuccessful);
-	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
-	void OnJoinSession(EOnJoinSessionCompleteResult::Type Result);
-	UFUNCTION()
-	void OnDestroySession(bool bWasSuccessful);
-	UFUNCTION()
-	void OnStartSession(bool bWasSuccessful);
+#pragma endregion
 
 private:
-	/* Widget Controls */
+#pragma region Buttons
 	UPROPERTY(meta = (BindWidget))
 	class UButton* HostButton;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
+#pragma endregion
 
-	/* Button Callbacks */
+#pragma region Button Callbacks
 	UFUNCTION()
 	void HostButtonClicked();
 	UFUNCTION()
 	void JoinButtonClicked();
+#pragma endregion
 
-	/* Destroy Logic */
 	void MenuTearDown();
-
-	/* Networking Variables */
-	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
-	int32 NumPublicConnections{4};
-	FString MatchType{ TEXT("FreeForAll") };
-	FString PathToLobby{ TEXT("") };
 };

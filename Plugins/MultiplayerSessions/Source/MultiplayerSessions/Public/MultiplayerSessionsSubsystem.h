@@ -36,16 +36,17 @@ class MULTIPLAYERSESSIONS_API UMultiplayerSessionsSubsystem : public UGameInstan
 {
 	GENERATED_BODY()
 public:
+#pragma region Initialization
 	UMultiplayerSessionsSubsystem();
 	~UMultiplayerSessionsSubsystem();
 
-	/* To handle Session functionality. The Menu class will call these */
-	void CreateSession(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
-	void FindSessions(int32 MaxSearchResults);
-	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
-	void DestroySession();
-	void StartSession();
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+#pragma endregion
 
+	UFUNCTION()
+	void ParseInviteId(); // Takes Steam ID from command line and joins that lobby and listen server
+
+#pragma region Getters
 	UFUNCTION()
 	FString GetMapNameKey() { return Key_MapName; }
 	UFUNCTION()
@@ -54,15 +55,13 @@ public:
 	FString GetGameModeKey() { return Key_GameMode; }
 	UFUNCTION()
 	FSteamId GetCurrentLobbyId() { return CurrentLobbyId; }
+#pragma endregion
 
+#pragma region Steam Functions
 	UFUNCTION()
 	void RequestLobbyList();
 	UFUNCTION()
-	void OnRequestLobbyList(int32 LobbiesMatching);
-	UFUNCTION()
 	void CreateLobby(FString MapName, FString LobbyName, FString GameMode, int32 MaxNumPlayers);
-	UFUNCTION()
-	void OnCreateLobby(TEnumAsByte<ESteamResult> Result, FSteamId LobbyID);
 	UFUNCTION()
 	void JoinLobby(FSteamId LobbyID);
 	UFUNCTION()
@@ -70,82 +69,70 @@ public:
 	UFUNCTION()
 	void JoinCurrentLobbyListenServer(); // Joins the listen server connected to the last lobby joined.
 	UFUNCTION()
-	void OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse);
-	UFUNCTION()
 	void ActivateInviteOverlay();
 	UFUNCTION()
 	void LeaveCurrentLobby();
+#pragma endregion
 
-	/* Our own custom delegates for the Menu classes to bind callbacks to */
-	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
-	FMultiplayerOnFindSessionsComplete MultiplayerOnFindSessionsComplete;
-	FMultiplayerOnJoinSessionComplete MultiplayerOnJoinSessionComplete;
-	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
-	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
-	FOnRequestLobbyListComplete OnRequestLobbyListComplete;
-	FOnCreateLobbyComplete OnCreateLobbyComplete;
-	FOnJoinLobbyComplete OnJoinLobbyComplete; // TODO: Bind from LobbyMenu
-
+#pragma region Steam Delegates
 	UPROPERTY(BlueprintAssignable, Category = "Steam Callbacks")
-	FOnGameLobbyJoinRequested OnGameLobbyJoinRequested;
+	FOnRequestLobbyListComplete OnRequestLobbyListComplete;
+	UPROPERTY(BlueprintAssignable, Category = "Steam Callbacks")
+	FOnCreateLobbyComplete OnCreateLobbyComplete;
+	UPROPERTY(BlueprintAssignable, Category = "Steam Callbacks")
+	FOnJoinLobbyComplete OnJoinLobbyComplete; // TODO: Bind from LobbyMenu
+#pragma endregion
 
-protected:
-	/* Internal callbacks for the delegates we will add to the Online Session Interface delegate list. These don't need to be called outside this class. */
-	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-	void OnFindSessionsComplete(bool bWasSuccessful);
-	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
-	void OnStartSessionComplete(FName SessionName, bool bWasSuccessful);
+#pragma region Steam Delegate Callbacks
+	UFUNCTION()
+	void OnRequestLobbyList(int32 LobbiesMatching);
+	UFUNCTION()
+	void OnCreateLobby(TEnumAsByte<ESteamResult> Result, FSteamId LobbyID);
+	UFUNCTION()
+	void OnJoinLobby(FSteamId LobbyId, bool bLocked, TEnumAsByte<ESteamChatRoomEnterResponse> ChatRoomEnterResponse);
+#pragma endregion
 
 private:
-	IOnlineSessionPtr SessionInterface;
-	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
-	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;
+#pragma region Steam API Callback Registrations
+	/* All Steam API callbacks are bound in the initialization logic for this class. Remember manual callbacks must be unregistered within the de-initializer for this class. */
 
-	/* To add to the online session interface delegate list. We will bind our MultiplayerSessionsSubsystem internal callbacks to these.
-	*  The FDelegateHandle declarations are to store the handles to the delegates after we add delegates to the delegate list. This will allow us to remove
-	*  the delegates from the delegate list when we are done using them. */
-	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
-	FDelegateHandle CreateSessionCompleteDelegateHandle;
-
-	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
-	FDelegateHandle FindSessionsCompleteDelegateHandle;
-
-	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate;
-	FDelegateHandle JoinSessionCompleteDelegateHandle;
-
-	FOnDestroySessionCompleteDelegate DestroySessionCompleteDelegate;
-	FDelegateHandle DestroySessionCompleteDelegateHandle;
-
-	FOnStartSessionCompleteDelegate StartSessionCompleteDelegate;
-	FDelegateHandle StartSessionCompleteDelegateHandle;
-
+	/* This callback is triggered when a player accepts a steam invite while the game is already running. */
 	STEAM_CALLBACK_MANUAL(UMultiplayerSessionsSubsystem, OnGameLobbyJoinRequestedCallback, GameLobbyJoinRequested_t, m_CallbackGameLobbyJoinRequested);
-
-
-	bool bCreateSessionOnDestroy{ false };
+#pragma endregion
+		
+#pragma region Last Settings
 	int32 LastMaxNumPlayers;
 	FString LastGameMode;
 	FString LastMapName;
 	FString LastLobbyName;
 
-	FSteamId LastLobbyJoined; // Keep track of the Steam ID for the last lobby we joined (generally also the current lobby).
+	UPROPERTY()
+	FSteamId LastLobbyJoined; // Steam ID for the last lobby we joined (generally also the current lobby).
+#pragma endregion
 
-	FString Key_MapName = TEXT("MapName");
-	FString Key_LobbyName = TEXT("LobbyName");
-	FString Key_GameMode = TEXT("GameMode");
-	FString Key_HostName = TEXT("HostName");
+#pragma region Lobby Metadata
+		UPROPERTY()
+		FLobbyMetadata LobbyMetadata; // Lobby metadata to be set on the lobby currently being created
+
+		FString Key_MapName = TEXT("MapName");
+		FString Key_LobbyName = TEXT("LobbyName");
+		FString Key_GameMode = TEXT("GameMode");
+		FString Key_HostName = TEXT("HostName");
+#pragma endregion
+
+#pragma region Steam Async Objects
+		UPROPERTY()
+		class USteamRequestLobbyListAsync* SteamRequestLobbyListAsync;
+		UPROPERTY()
+		class USteamCreateLobbyAsync* SteamCreateLobbyAsync;
+		UPROPERTY()
+		class USteamJoinLobbyAsync* SteamJoinLobbyAsync;
+#pragma endregion
 
 	UPROPERTY()
-	class USteamRequestLobbyListAsync* SteamRequestLobbyListAsync;
-	UPROPERTY()
-	class USteamCreateLobbyAsync* SteamCreateLobbyAsync;
-	UPROPERTY()
-	class USteamJoinLobbyAsync* SteamJoinLobbyAsync;
+	FSteamId CurrentLobbyId; // For my particular game, I only want to support having one active lobby at a time. This can be a list if you want multiple
 
-	UPROPERTY()
-	FSteamId CurrentLobbyId; // Only supports one single lobby right now. Steam supports one player owning multiple lobbies, so may need to implement later
-	UPROPERTY()
-	FLobbyMetadata LobbyMetadata; // Lobby metadata to be set on the lobby currently being created
+	UFUNCTION()
+	void InitializeSteamCallbacks();
 
 };

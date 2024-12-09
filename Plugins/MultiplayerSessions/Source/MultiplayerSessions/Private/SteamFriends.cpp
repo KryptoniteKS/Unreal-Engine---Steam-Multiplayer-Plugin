@@ -120,8 +120,8 @@ int32 USteamFriends::GetClanChatMessage(FSteamId SteamIdClan, int32 MessageIndex
 		CSteamID SteamId;
 		SteamId = SteamIdClan.GetSteamID();
 		CSteamID SteamIdUserOut;
-		EChatEntryType ChatEntryType;
-		int32 Result = SteamFriends()->GetClanChatMessage(SteamId, MessageIndex, (char*)Text.GetData(), Text.Num(), &ChatEntryType, &SteamIdUserOut);
+		EChatEntryType ChatEntryTypeOut;
+		int32 Result = SteamFriends()->GetClanChatMessage(SteamId, MessageIndex, (char*)Text.GetData(), Text.Num(), &ChatEntryTypeOut, &SteamIdUserOut);
 		return Result;
 	}
 

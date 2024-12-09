@@ -46,10 +46,8 @@ bool ULobbyMenu::Initialize()
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
 		if (MultiplayerSessionsSubsystem)
 		{
-			MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
 			MultiplayerSessionsSubsystem->OnRequestLobbyListComplete.AddDynamic(this, &ThisClass::OnRequestLobbyList);
 			MultiplayerSessionsSubsystem->OnJoinLobbyComplete.AddDynamic(this, &ThisClass::OnJoinLobby);
-			//MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
 		}
 	}
 

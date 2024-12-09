@@ -31,7 +31,6 @@ bool UHostMenu::Initialize()
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
 		if (MultiplayerSessionsSubsystem)
 		{
-			MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
 			MultiplayerSessionsSubsystem->OnCreateLobbyComplete.AddDynamic(this, &ThisClass::OnCreateLobby);
 		}
 	}
