@@ -26,8 +26,6 @@ protected:
 
 	/* Custom Callbacks for the Multiplayer Subsystem */
 	UFUNCTION()
-	void OnCreateSession(bool bWasSuccessful);
-	UFUNCTION()
 	void OnCreateLobby(bool bWasSuccessful);
 
 private:

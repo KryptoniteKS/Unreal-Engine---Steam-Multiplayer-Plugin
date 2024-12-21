@@ -102,44 +102,6 @@ void UHostMenu::OnCreateLobby(bool bWasSuccessful)
 	}
 }
 
-void UHostMenu::OnCreateSession(bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Yellow,
-				FString(TEXT("Session created Successfully. Traveling to lobby..."))
-			);
-		}
-
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			// Build our map path and travel to it as a listen server
-			auto PathToLobby = FString::Printf(TEXT("/Game/%s/%s?listen"), *ServerMapsDirectory, *MenuHelper::FormatMapName(MapName, true));
-			World->ServerTravel(PathToLobby);
-		}
-	}
-	else
-	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Red,
-				FString(TEXT("Failed to create session."))
-			);
-		}
-
-		EnableControls(true);
-	}
-}
-
 void UHostMenu::EnableControls(bool bShouldEnable)
 {
 	// Enable/Disable all controls on the page - Disable when creating a session, enable when failing to create a session

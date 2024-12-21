@@ -16,7 +16,7 @@ THIRD_PARTY_INCLUDES_END
 
 #include "MultiplayerSessionsSubsystem.generated.h"
 
-
+#pragma region Delegates
 /* Declaring our own custom delegates for the Menu class to bind callbacks to */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete, bool, bWasSuccessful);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnFindSessionsComplete, const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWassuccessful);
@@ -28,7 +28,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateLobbyComplete, bool, bWasSu
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJoinLobbyComplete, bool, bWasSuccessful);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameLobbyJoinRequested, FSteamId, SteamId, FSteamId, LobbyId);
-
+#pragma endregion
 
 
 UCLASS()
@@ -67,11 +67,13 @@ public:
 	UFUNCTION()
 	void JoinListenServer(FSteamId SessionID); // On a listen server, the SessionID is the SteamID of the host player
 	UFUNCTION()
-	void JoinCurrentLobbyListenServer(); // Joins the listen server connected to the last lobby joined.
+	void JoinCurrentLobbyGameServer(); // Joins the game server connected to the last lobby joined.
 	UFUNCTION()
 	void ActivateInviteOverlay();
 	UFUNCTION()
 	void LeaveCurrentLobby();
+	UFUNCTION()
+	void SetLobbyGameServer(FSteamId LobbyID, FString ServerIP, int32 ServerPort, FSteamId GameServerID);
 #pragma endregion
 
 #pragma region Steam Delegates
@@ -98,6 +100,11 @@ private:
 
 	/* This callback is triggered when a player accepts a steam invite while the game is already running. */
 	STEAM_CALLBACK_MANUAL(UMultiplayerSessionsSubsystem, OnGameLobbyJoinRequestedCallback, GameLobbyJoinRequested_t, m_CallbackGameLobbyJoinRequested);
+
+	/* This callback is triggered when a lobby that the player is apart of has a game server get associated with it. */
+	STEAM_CALLBACK_MANUAL(UMultiplayerSessionsSubsystem, OnSetLobbyGameServerCallback, LobbyGameCreated_t, m_CallbackSetLobbyGameServer);
+
+
 #pragma endregion
 		
 #pragma region Last Settings

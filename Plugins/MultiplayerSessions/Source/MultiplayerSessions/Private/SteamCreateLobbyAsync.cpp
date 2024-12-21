@@ -20,6 +20,7 @@ void USteamCreateLobbyAsync::OnCreateLobbyCallback(LobbyCreated_t* LobbyCreated,
 	    // If IO failure, broadcast that result
 	    if (bIOFailure)
 	    {
+			UE_LOG(LogTemp, Warning, TEXT("IO Failure in Steam API Call to Create Lobby!"));
 	        OnFailure.Broadcast(ESteamResult::ResultIOFailure, FSteamId(0));
 	    }
 	    else

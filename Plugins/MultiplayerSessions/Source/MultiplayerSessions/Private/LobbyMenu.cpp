@@ -120,7 +120,7 @@ void ULobbyMenu::OnJoinLobby(bool bWasSuccessful)
 		FString(TEXT("Successfully joined the Steam lobby! Attempting to join affiliated listen server..."))
 	);
 
-	MultiplayerSessionsSubsystem->JoinCurrentLobbyListenServer();
+	MultiplayerSessionsSubsystem->JoinCurrentLobbyGameServer();
 
 }
 

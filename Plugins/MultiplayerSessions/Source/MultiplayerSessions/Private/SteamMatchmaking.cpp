@@ -2,6 +2,7 @@
 
 
 #include "SteamMatchmaking.h"
+#include "Interfaces/IPv4/IPv4Address.h"
 
 int32 USteamMatchmaking::AddFavoriteGame(FSteamAppId AppID, FString IP, int32 ConnPort, int32 QueryPort, TArray<int32> Flags, int32 Time32LastPlayedOnServer)
 {
@@ -146,7 +147,19 @@ int32 USteamMatchmaking::GetLobbyDataCount(FSteamId LobbyID)
 
 bool USteamMatchmaking::GetLobbyGameServer(FSteamId LobbyID, FString& ServerIP, int32& ServerPort, FSteamId& SteamID)
 {
-	return false;
+	if (!SteamMatchmaking())
+	{
+		return false;
+	}
+
+	uint32 serverIP;
+	uint16 serverPort;
+	CSteamID steamID;
+	bool Result = SteamMatchmaking()->GetLobbyGameServer(LobbyID.GetSteamID(), &serverIP, &serverPort, &steamID);
+	ServerIP = FIPv4Address(serverIP).ToString();
+	ServerPort = serverPort;
+	SteamID = steamID;
+	return Result;
 }
 
 FSteamId USteamMatchmaking::GetLobbyMemberByIndex(FSteamId LobbyID, int32 MemberIndex)
@@ -245,26 +258,62 @@ bool USteamMatchmaking::SetLobbyData(FSteamId LobbyID, FString Key, FString Valu
 
 void USteamMatchmaking::SetLobbyGameServer(FSteamId LobbyID, FString ServerIP, int32 ServerPort, FSteamId SteamID)
 {
+	if (!SteamMatchmaking())
+	{
+		return;
+	}
+
+	FIPv4Address serverIP;
+	FIPv4Address::Parse(ServerIP, serverIP);
+	SteamMatchmaking()->SetLobbyGameServer(LobbyID.GetSteamID(), serverIP.Value, ServerPort, SteamID.GetSteamID());
 }
 
 bool USteamMatchmaking::SetLobbyJoinable(FSteamId LobbyID, bool bJoinable)
 {
-	return false;
+	if (!SteamMatchmaking())
+	{
+		return false;
+	}
+
+	return SteamMatchmaking()->SetLobbyJoinable(LobbyID.GetSteamID(), bJoinable);
 }
 
 void USteamMatchmaking::SetLobbyMemberData(FSteamId LobbyID, FString Key, FString Value)
 {
+	if (!SteamMatchmaking())
+	{
+		return;
+	}
+
+	SteamMatchmaking()->SetLobbyMemberData(LobbyID.GetSteamID(), TCHAR_TO_ANSI(*Key), TCHAR_TO_ANSI(*Value));
 }
 
 void USteamMatchmaking::SetLobbyMemberLimit(FSteamId LobbyID, int32 MemberLimit)
 {
+	if (!SteamMatchmaking())
+	{
+		return;
+	}
+
+	SteamMatchmaking()->SetLobbyMemberLimit(LobbyID.GetSteamID(), MemberLimit);
 }
 
 void USteamMatchmaking::SetLobbyOwner(FSteamId LobbyID, FSteamId SteamID)
 {
+	if (!SteamMatchmaking())
+	{
+		return;
+	}
+
+	SteamMatchmaking()->SetLobbyOwner(LobbyID.GetSteamID(), SteamID.GetSteamID());
 }
 
 bool USteamMatchmaking::SetLobbyType(FSteamId LobbyID, TEnumAsByte<ESteamLobbyType> LobbyType)
 {
-	return false;
+	if (!SteamMatchmaking())
+	{
+		return false;
+	}
+
+	return SteamMatchmaking()->SetLobbyType(LobbyID.GetSteamID(), static_cast<ELobbyType>(LobbyType.GetValue()));
 }

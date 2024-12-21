@@ -59,11 +59,17 @@ void UMultiplayerSessionsSubsystem::InitializeSteamCallbacks()
 	{
 		m_CallbackGameLobbyJoinRequested.Register(this, &ThisClass::OnGameLobbyJoinRequestedCallback);
 	}
+
+	if (SteamMatchmaking())
+	{
+		m_CallbackSetLobbyGameServer.Register(this, &ThisClass::OnSetLobbyGameServerCallback);
+	}
 }
 
 UMultiplayerSessionsSubsystem::~UMultiplayerSessionsSubsystem()
 {
 	m_CallbackGameLobbyJoinRequested.Unregister();
+	m_CallbackSetLobbyGameServer.Unregister();
 }
 
 void UMultiplayerSessionsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -90,7 +96,7 @@ void UMultiplayerSessionsSubsystem::ParseInviteId()
 		{
 			UE_LOG(LogTemp, Log, TEXT("Successfully retrieved Steam Lobby ID from invite: %lld"), SteamLobbyId);
 			JoinLobby(FSteamId(SteamLobbyId));
-			JoinCurrentLobbyListenServer();
+			JoinCurrentLobbyGameServer();
 		}
 		else
 		{
@@ -133,6 +139,7 @@ void UMultiplayerSessionsSubsystem::RequestLobbyList()
 void UMultiplayerSessionsSubsystem::JoinLobby(FSteamId LobbyID)
 {
 	// TODO: Before we join ANY lobbies, let's leave any existing lobby we may be in. If we stay in any orphaned lobbies, they will not disappear from the search list.
+	LeaveCurrentLobby();
 
 	SteamJoinLobbyAsync->JoinLobby(LobbyID);
 	// Should eventually trigger our OnJoinLobby callback with the Steam API response
@@ -141,6 +148,12 @@ void UMultiplayerSessionsSubsystem::JoinLobby(FSteamId LobbyID)
 void UMultiplayerSessionsSubsystem::LeaveCurrentLobby()
 {
 	USteamMatchmaking::LeaveLobby(CurrentLobbyId);
+}
+
+void UMultiplayerSessionsSubsystem::SetLobbyGameServer(FSteamId LobbyID, FString ServerIP, int32 ServerPort, FSteamId GameServerID)
+{
+	// Only need to send Steam ID for Lobby and Listen Server - Will trigger our OnSetLobbyGameServerCallback function if successful
+	USteamMatchmaking::SetLobbyGameServer(LobbyID, ServerIP, ServerPort, GameServerID);
 }
 #pragma endregion
 
@@ -163,6 +176,19 @@ void UMultiplayerSessionsSubsystem::OnCreateLobby(TEnumAsByte<ESteamResult> Resu
 		USteamMatchmaking::SetLobbyData(LobbyID, Key_MapName, LobbyMetadata.MapName); // Literal map name, unformatted
 		UE_LOG(LogTemp, Warning, TEXT("Setting Lobby Metadata - Key: %s - Value: %s"), *Key_HostName, *LobbyMetadata.HostName);
 		USteamMatchmaking::SetLobbyData(LobbyID, Key_HostName, LobbyMetadata.HostName);
+
+		// Set the lobby's game server. For now it is just a listen server so there is no IP or Port
+		if (SteamUser())
+		{
+			FSteamId MySteamID = FSteamId(SteamUser()->GetSteamID());
+			UE_LOG(LogTemp, Warning, TEXT("Setting Lobby Game Server to current player's Steam ID: %llu - "), MySteamID.Result);
+			SetLobbyGameServer(LobbyID, TEXT(""), 0, FSteamId(MySteamID));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to set Lobby Game Server. Steam User API was not initialized."));
+		}
+		
 
 		OnCreateLobbyComplete.Broadcast(true);
 	}
@@ -217,13 +243,14 @@ void UMultiplayerSessionsSubsystem::OnJoinLobby(FSteamId LobbyId, bool bLocked, 
 	// If we have successfully entered the lobby, or "Chat room", broadcast that back to the LobbyMenu
 	if (ChatRoomEnterResponse == ESteamChatRoomEnterResponse::ChatRoomEnterResponseSuccess)
 	{
+		UE_LOG(LogTemp, Error, TEXT("Steam API SteamChatRoomEnterResponse indicates success."));
 		LastLobbyJoined = LobbyId;
-		OnJoinLobbyComplete.Broadcast(true);
+		OnJoinLobbyComplete.Broadcast(true); // Triggers the OnJoinLobby function on the LobbyMenu class
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Steam API SteamChatRoomEnterResponse does not indicate success."));
-		OnJoinLobbyComplete.Broadcast(false);
+		OnJoinLobbyComplete.Broadcast(false); // Triggers the OnJoinLobby function on the LobbyMenu class
 	}
 }
 #pragma endregion
@@ -231,10 +258,18 @@ void UMultiplayerSessionsSubsystem::OnJoinLobby(FSteamId LobbyId, bool bLocked, 
 #pragma region Steam API Registered Callbacks
 void UMultiplayerSessionsSubsystem::OnGameLobbyJoinRequestedCallback(GameLobbyJoinRequested_t* pCallback)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Received GameLobbyJoinRequested callabck from Steam. Attempting to connect to requested lobby and listen server..."));
+	UE_LOG(LogTemp, Warning, TEXT("Received GameLobbyJoinRequested callback from Steam. Attempting to connect to requested lobby and associated Game server..."));
 	JoinLobby(FSteamId(pCallback->m_steamIDLobby));
-	JoinCurrentLobbyListenServer();
+	JoinCurrentLobbyGameServer();
 }
+
+void UMultiplayerSessionsSubsystem::OnSetLobbyGameServerCallback(LobbyGameCreated_t* pCallback)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Received SetLobbyGameServer callback from Steam. Joining current lobby's game server."));
+	JoinCurrentLobbyGameServer();
+}
+
+
 #pragma endregion
 
 #pragma region Steam Functions
@@ -262,17 +297,30 @@ void UMultiplayerSessionsSubsystem::JoinListenServer(FSteamId SessionID)
 
 }
 
-void UMultiplayerSessionsSubsystem::JoinCurrentLobbyListenServer()
+void UMultiplayerSessionsSubsystem::JoinCurrentLobbyGameServer()
 {
+	if (!SteamUser())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to join Lobby Game Server. Steam User API was not initialized."));
+		return;
+	}
+
 	FSteamId CurrentLobbyOwner = USteamMatchmaking::GetLobbyOwner(LastLobbyJoined);
 
-	if (CurrentLobbyOwner.Result != 0)
+	FString ServerIP;
+	int32 ServerPort;
+	FSteamId ServerID;
+	USteamMatchmaking::GetLobbyGameServer(LastLobbyJoined, ServerIP, ServerPort, ServerID);
+
+	// Ensure there is a valid game server and that it matches the host of the lobby but is NOT yourself (you don't want to request to join your own listen server).
+	if (CurrentLobbyOwner.Result != 0 && CurrentLobbyOwner.Result == ServerID.Result && CurrentLobbyOwner.Result != FSteamId(SteamUser()->GetSteamID()).Result)
 	{
-		JoinListenServer(CurrentLobbyOwner);
+		UE_LOG(LogTemp, Warning, TEXT("Joining current lobby's associated game server with Server ID: %llu"), ServerID.Result);
+		JoinListenServer(ServerID);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid Lobby Owner. Either the lobby owner data was invalid, or the local player is not in a Steam lobby.\n Last Lobby Joined: %llu"), LastLobbyJoined.Result)
+		UE_LOG(LogTemp, Warning, TEXT("Either the Current Lobby Owner was invalid, the associated game server did not match the original owner, or the user attempting to join the listen server was already the host. Current Lobby ID: %llu"), LastLobbyJoined.Result)
 	}
 }
 #pragma endregion
