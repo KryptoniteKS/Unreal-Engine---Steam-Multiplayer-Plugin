@@ -7,11 +7,13 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "SteamShared.h"
 #include "Tickable.h"
+#include "TimerManager.h"
 THIRD_PARTY_INCLUDES_START
 #include <steam/steam_api.h>
 #include <steam/isteammatchmaking.h>
 #include <steam/isteamuser.h>
 #include <steam/isteamfriends.h>
+#include <steam/isteamnetworkingutils.h>
 THIRD_PARTY_INCLUDES_END
 
 #include "MultiplayerSessionsSubsystem.generated.h"
@@ -41,6 +43,8 @@ public:
 	~UMultiplayerSessionsSubsystem();
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	void InitializePingLocation();
 #pragma endregion
 
 	UFUNCTION()
@@ -125,6 +129,7 @@ private:
 		FString Key_LobbyName = TEXT("LobbyName");
 		FString Key_GameMode = TEXT("GameMode");
 		FString Key_HostName = TEXT("HostName");
+		FString Key_PingLocation = TEXT("PingLocation");
 #pragma endregion
 
 #pragma region Steam Async Objects
@@ -138,6 +143,11 @@ private:
 
 	UPROPERTY()
 	FSteamId CurrentLobbyId; // For my particular game, I only want to support having one active lobby at a time. This can be a list if you want multiple
+
+	void CheckRelayNetworkStatus();
+	SteamNetworkPingLocation_t LocalPingLocation;
+	float LocalPingLocationAge = -1;
+	FTimerHandle RelayNetworkCheckTimerHandle;
 
 	UFUNCTION()
 	void InitializeSteamCallbacks();

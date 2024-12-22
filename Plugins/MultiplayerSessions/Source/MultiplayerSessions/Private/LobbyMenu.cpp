@@ -73,6 +73,9 @@ void ULobbyMenu::FillGameModeComboBox()
 
 void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
 {
+	// As soon as we have our result list, enable the search button again
+	SearchButton->SetIsEnabled(true);
+
 	GEngine->AddOnScreenDebugMessage(
 		-1,
 		15.f,
@@ -95,8 +98,7 @@ void ULobbyMenu::OnRequestLobbyList(const TArray<FLobbyEntry>& LobbyData)
 		AddSession(NewSession);
 	}
 
-	// After looping through all the results, re-enable the Search button
-	SearchButton->SetIsEnabled(true);
+
 }
 
 void ULobbyMenu::OnJoinLobby(bool bWasSuccessful)
@@ -126,6 +128,9 @@ void ULobbyMenu::OnJoinLobby(bool bWasSuccessful)
 
 void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
 {
+	// As soon as we have our result list, enable the search button again
+	SearchButton->SetIsEnabled(true);
+
 	if (MultiplayerSessionsSubsystem == nullptr)
 	{
 		return;
@@ -190,9 +195,6 @@ void ULobbyMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Sessio
 			AddSession(NewSession);
 		}
 	}
-
-	// After looping through all the results, re-enable the Search button
-	SearchButton->SetIsEnabled(true);
 }
 
 void ULobbyMenu::AddSession(USessionEntry* Session)
@@ -244,45 +246,20 @@ void ULobbyMenu::JoinButtonClicked()
 	auto LobbyEntry = SelectedSession->GetLobbyEntry();
 	auto LobbyId = LobbyEntry.LobbyID;
 	MultiplayerSessionsSubsystem->JoinLobby(LobbyId);
-
-
-	//if (!SelectedSession)
-	//{
-	//	return;
-	//}
-
-	//auto Session = SelectedSession->GetSessionSearchResult();
-	//if (Session.IsValid() && MultiplayerSessionsSubsystem != nullptr)
-	//{
-	//	MultiplayerSessionsSubsystem->JoinSession(Session);
-	//	GEngine->AddOnScreenDebugMessage(
-	//		-1,
-	//		15.f,
-	//		FColor::Magenta,
-	//		FString::Format(TEXT("Joining {0}'s lobby..."), { Session.Session.OwningUserName })
-	//	);
-	//}
-	//else
-	//{
-	//	GEngine->AddOnScreenDebugMessage(
-	//		-1,
-	//		15.f,
-	//		FColor::Red,
-	//		FString(TEXT("Either the session was invalid or the multiplayer subsystem was invalid."))
-	//	);
-	//}
 }
 
 void ULobbyMenu::SearchButtonClicked()
 {
 	SearchButton->SetIsEnabled(false);
 	ClearSessions();
+
 	if (MultiplayerSessionsSubsystem)
 	{
 		// Add our filters, if they exist
 		auto SelectedMap = Combo_Maps->GetSelectedOption(); // formatted map name
 		auto SelectedGameMode = Combo_GameModes->GetSelectedOption();
 		auto AllOption = MenuHelper::GetAllOption();
+
 		// If we are not filtering by ALL maps, filter by the specific map
 		if (!SelectedMap.Equals(AllOption))
 		{
@@ -295,9 +272,13 @@ void ULobbyMenu::SearchButtonClicked()
 			auto GameModeKey = MultiplayerSessionsSubsystem->GetGameModeKey();
 			USteamMatchmaking::AddRequestLobbyListStringFilter(GameModeKey, SelectedGameMode, ESteamLobbyComparison::LobbyComparisonEqualTo);
 		}
-		// This will eventually trigger our callback on this class: OnFindSessions()
-		//MultiplayerSessionsSubsystem->FindSessions(1000);
+
 		MultiplayerSessionsSubsystem->RequestLobbyList();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem was invalid whilst attempting to find lobbies!"));
+		SearchButton->SetIsEnabled(true);
 	}
 }
 

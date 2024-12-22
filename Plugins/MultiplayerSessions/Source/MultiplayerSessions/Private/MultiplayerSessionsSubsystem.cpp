@@ -15,9 +15,70 @@
 #pragma region Initialization
 UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem()
 {
-	SteamAPI_Init();
+	if (SteamAPI_IsSteamRunning())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Steam is currently running. The Steam API will now be initialized and its functions should be accessible."));
+		SteamAPI_Init();
+		InitializeSteamCallbacks();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Steam is not running. Steam API functions will not be accessible."));
+	}
+}
 
-	InitializeSteamCallbacks();
+void UMultiplayerSessionsSubsystem::InitializePingLocation()
+{
+	// Start a timer to check relay network status
+	GetWorld()->GetTimerManager().SetTimer(
+		RelayNetworkCheckTimerHandle,
+		this,
+		&ThisClass::CheckRelayNetworkStatus,
+		1.f,
+		true // Looping timer
+	);
+}
+
+void UMultiplayerSessionsSubsystem::CheckRelayNetworkStatus()
+{
+	if (SteamNetworkingUtils())
+	{
+		SteamRelayNetworkStatus_t RelayNetworkStatusDetails;
+		ESteamNetworkingAvailability CurrentStatus = SteamNetworkingUtils()->GetRelayNetworkStatus(&RelayNetworkStatusDetails);
+
+		// Log the current availability status
+		UE_LOG(LogTemp, Log, TEXT("Relay Network Status: %d"), static_cast<int32>(CurrentStatus));
+
+		// Check if the relay network is ready
+		if (CurrentStatus == k_ESteamNetworkingAvailability_Current)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Relay network is initialized and ready."));
+
+			LocalPingLocationAge = SteamNetworkingUtils()->GetLocalPingLocation(LocalPingLocation);
+			if (LocalPingLocationAge > 0)
+			{
+				UE_LOG(LogTemp, Log, TEXT("Successfully retrieved local ping location. Age: %f\nClearing timer handle."), LocalPingLocationAge);
+
+				// Clear the timer when the relay network is ready
+				GetWorld()->GetTimerManager().ClearTimer(RelayNetworkCheckTimerHandle);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to return Local Ping Location. Retrying..."));
+			}
+		}
+		else
+		{
+			// Log additional details about the relay network status
+			UE_LOG(LogTemp, Log, TEXT("Relay network not available yet. Status details: m_eAvail=%d, m_debugMsg=%s"),
+				   static_cast<int32>(RelayNetworkStatusDetails.m_eAvail),
+				   UTF8_TO_TCHAR(RelayNetworkStatusDetails.m_debugMsg));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SteamNetworkingUtils is null!"));
+	}
 }
 
 void UMultiplayerSessionsSubsystem::InitializeSteamCallbacks()
@@ -75,6 +136,17 @@ UMultiplayerSessionsSubsystem::~UMultiplayerSessionsSubsystem()
 void UMultiplayerSessionsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	// Initializes the steam relay network to allow us to make ping estimations
+	if (SteamNetworkingUtils())
+	{
+		SteamNetworkingUtils()->InitRelayNetworkAccess();
+		InitializePingLocation();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SteamNetworkingUtils was not yet initialized whilst initializing our MultiplayerSessionsSubsystem!"));
+	}
 
 	// We need to get the Steam ID for the lobby from any existing invite if one exists and join that lobby and server
 	ParseInviteId();
@@ -177,6 +249,24 @@ void UMultiplayerSessionsSubsystem::OnCreateLobby(TEnumAsByte<ESteamResult> Resu
 		UE_LOG(LogTemp, Warning, TEXT("Setting Lobby Metadata - Key: %s - Value: %s"), *Key_HostName, *LobbyMetadata.HostName);
 		USteamMatchmaking::SetLobbyData(LobbyID, Key_HostName, LobbyMetadata.HostName);
 
+		if (LocalPingLocationAge <= 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Local Ping Location Age (%f) indicates it is unitialized! Lobby Metadata will not reflect the correct ping location."), LocalPingLocationAge);
+		}
+		else
+		{
+			if (SteamNetworkingUtils())
+			{
+				char SerializedPingLocation[k_cchMaxSteamNetworkingPingLocationString];
+				UE_LOG(LogTemp, Log, TEXT("Attempting to serialize Local Ping Location..."));
+				SteamNetworkingUtils()->ConvertPingLocationToString(LocalPingLocation, SerializedPingLocation, sizeof(SerializedPingLocation));
+
+				// Store the serialized ping location as a lobby metadata key
+				UE_LOG(LogTemp, Log, TEXT("Setting Lobby Metadata - Key: %s - Value: %hs"), *Key_PingLocation, SerializedPingLocation);
+				USteamMatchmaking::SetLobbyData(LobbyID, Key_PingLocation, FString(UTF8_TO_TCHAR(SerializedPingLocation)));
+			}
+		}
+
 		// Set the lobby's game server. For now it is just a listen server so there is no IP or Port
 		if (SteamUser())
 		{
@@ -188,7 +278,6 @@ void UMultiplayerSessionsSubsystem::OnCreateLobby(TEnumAsByte<ESteamResult> Resu
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Failed to set Lobby Game Server. Steam User API was not initialized."));
 		}
-		
 
 		OnCreateLobbyComplete.Broadcast(true);
 	}
@@ -200,11 +289,6 @@ void UMultiplayerSessionsSubsystem::OnCreateLobby(TEnumAsByte<ESteamResult> Resu
 
 void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 {
-	if (LobbiesMatching <= 0)
-	{
-		return;
-	}
-
 	UE_LOG(LogTemp, Error, TEXT("At least one lobby was found. Looping through them..."));
 
 	// Loop through the sessions by using GetLobbyByIndex
@@ -217,7 +301,36 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 		LobbyEntry.LobbyID = LobbyId;
 		LobbyEntry.MaxPlayers = USteamMatchmaking::GetLobbyMemberLimit(LobbyId);
 		LobbyEntry.NumPlayers = USteamMatchmaking::GetNumLobbyMembers(LobbyId);
-		LobbyEntry.Ping = 72;
+
+		LobbyEntry.Ping = 100;
+		FString LobbyPingLocation = USteamMatchmaking::GetLobbyData(LobbyId, Key_PingLocation);
+		if (LobbyPingLocation.IsEmpty())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Ping Location for Lobby ID %llu was empty! Ping will show as 100."), LobbyId.Result);
+		}
+		else
+		{
+			SteamNetworkPingLocation_t ParsedPingLocation;
+			if (SteamNetworkingUtils()->ParsePingLocationString(TCHAR_TO_UTF8(*LobbyPingLocation), ParsedPingLocation))
+			{
+				int32 EstimatedPing = SteamNetworkingUtils()->EstimatePingTimeFromLocalHost(ParsedPingLocation);
+
+				if (EstimatedPing >= 0)
+				{
+					UE_LOG(LogTemp, Log, TEXT("Successfully parsed Lobby %llu ping location! Estimated ping is %d"), LobbyId.Result, EstimatedPing);
+					LobbyEntry.Ping = EstimatedPing;
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Ping estimation failed for Lobby ID %llu. Ping will show as 100."), LobbyId.Result);
+				}				
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Ping estimation failed for Lobby ID %llu. Ping will show as 100."), LobbyId.Result);
+			}
+		}
+
 		LobbyEntry.HostName = USteamMatchmaking::GetLobbyData(LobbyId, Key_HostName);
 		LobbyEntry.GameMode = USteamMatchmaking::GetLobbyData(LobbyId, Key_GameMode);
 		LobbyEntry.LobbyName = USteamMatchmaking::GetLobbyData(LobbyId, Key_LobbyName);
@@ -227,7 +340,6 @@ void UMultiplayerSessionsSubsystem::OnRequestLobbyList(int32 LobbiesMatching)
 		UE_LOG(LogTemp, Error, TEXT("Adding Lobby with index %d and Lobby ID %lu to our menu."), curLobby, LobbyId.Result);
 		LobbyData.Add(LobbyEntry);
 	}
-
 
 	if (LobbyData.Num() > 0)
 	{
